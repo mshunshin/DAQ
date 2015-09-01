@@ -1,0 +1,29 @@
+# Mac stuff
+.~lock*
+.DS_Store
+._.DS_Store
+._*
+
+# R Stuff
+.Rproj.user/
+.Rhistory
+.RData
+
+# Byte-compiled / optimized / DLL files
+**/__pycache__
+*.py[cod]
+
+# Python IDE
+.idea/
+
+# Python Notebook
+.ipynb_checkpoints/
+
+# If images get it
+*.png
+*.fg
+*.hdf5
+*.mat
+*.jpg
+*.jpeg
+
