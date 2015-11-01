@@ -14,7 +14,7 @@ patient = 'DKDFT003'
 exp="Exp7"
 
 
-pt = hdy.LaserAnalysis.from_db(database_dir=database_dir, database_fn=database_fn, patient=patient, exp=exp)
+pt = hdy.LaserAnalysis(database_dir=database_dir, database_fn=database_fn, patient=patient, exp=exp)
 pt.process()
 m = hdy.LaserGUI(pt)
 

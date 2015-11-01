@@ -22,7 +22,7 @@ results_list = []
 
 for patient, exp in zip(patients, experiments):
     try:
-        pt = hdy.LaserAnalysis.from_db(database_dir=database_dir, database_fn=database_fn, patient=patient, exp=exp)
+        pt = hdy.LaserAnalysis(database_dir=database_dir, database_fn=database_fn, patient=patient, exp=exp)
         pt.process()
         results_list.append(pt.results)
     except Exception as e:
