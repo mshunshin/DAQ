@@ -14,15 +14,18 @@ from PyQt5 import QtWidgets
 import hdy
 
 def main():
-    database_dir = '/Volumes/Matt-Data/Box/ZIF-Data'
-    database_fn = 'Laser-Haem.csv'
-    patient = 'RSP34'
-    exp="Exp1"
+    database_dir = '/Volumes/Matt-Data/Box/LPM-Data'
+    database_fn = 'Haem-Latest.csv'
+    patient = 'DKEPS013'
+    exp="Exp29"
 
     #database_dir = '/Volumes/Matt-Data/Box/LPM-Data/DFT data for analysis in paper/'
-    #database_fn = 'DFTregister.csv'
-    #patient = 'DKDFT037'
-    #exp="Exp12"
+    #database_fn = 'DFTregister-new.csv'
+    #patient = 'DKDFT033'
+    #exp="Exp19"
+
+    #patient = 'DKDFT048'
+    #exp="Exp8"
 
     #DFT
 

@@ -10,8 +10,8 @@ import hdy
 database_dir = '/Volumes/Matt-Data/Box/LPM-Data/DFT data for analysis in paper/'
 database_fn = 'DFTregister-new.csv'
 
-#MODE = 'double_count_fix_true'
-MODE = 'normal'
+MODE = 'double_count_fix'
+#MODE = 'normal'
 
 db = pd.read_csv(os.path.join(database_dir, database_fn))
 
