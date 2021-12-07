@@ -1,6 +1,4 @@
 import os
-import sys
-import collections
 import datetime
 
 import numpy as np
@@ -40,6 +38,41 @@ class TimeAxisItem(pg.AxisItem):
         sec = int(value/1000)%60
         min = int(value/(1000*60))
         return "{min}:{sec:02d}.{ms:03d}".format(min=min, sec=sec, ms=ms)
+
+class MagiQuantLaser(QtWidgets.QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+
+        self.initUI()
+
+
+    def initUI(self):
+        self.statusBar().showMessage('Ready')
+
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+
+        openFile = QtWidgets.QAction(QtGui.QIcon('open.png'), 'Open', self)
+        openFile.setShortcut('Ctrl+O')
+        openFile.setStatusTip('Open new File')
+        openFile.triggered.connect(self.showFileOpen)
+
+        fileMenu.addAction(openFile)
+
+        menubar.addMenu(fileMenu)
+
+        self.lasergui = LaserGui()
+        self.setCentralWidget(self.lasergui)
+        self.setWindowTitle('MagiQuant Laser')
+
+        self.show()
+
+
+    def showFileOpen(self):
+        file_dir = QtWidgets.QFileDialog.getExistingDirectory(self, 'Open file', '/Users')
+        self.mattcon_widget.file_selector.load_dir(file_dir)
+
 
 class LaserGui(QtWidgets.QWidget):
 
@@ -307,12 +340,12 @@ class LaserGui(QtWidgets.QWidget):
             print("off")
             self.ecg_peak_plt.setData(x=[], y=[],
                          pen=None, symbol=None,
-                         antialise=True, autoDownsample=False, downsampleMethod='peak', clipToView=True)
+                         antialise=True, autoDownsample=False, downsampleMethod='peak', clipToView=False)
 
         elif self.hrv_toggle.isChecked():
             self.ecg_peak_plt.setData(x=self.ecg_peaks_x, y=self.ecg_peaks_y,
                          pen=None, symbol='o', size=4, pxMode=True,
-                         antialise=True, autoDownsample=False, downsampleMethod='peak', clipToView=True)
+                         antialise=True, autoDownsample=False, downsampleMethod='peak', clipToView=False)
 
     def overview_region_changed(self):
         self.overview_region.setZValue(10)
@@ -429,7 +462,10 @@ class LaserGui(QtWidgets.QWidget):
             self.laser2_value.setText("Laser2: " + str(self.laser_exp.results['Laser2_Magic']))
             self.rr_value.setText("RR: " + str(int(np.mean(np.diff(self.laser_exp.ecg.peaks_sample)))))
             self.hr_value.setText("HR: " + str(int(60000/np.mean(np.diff(self.laser_exp.ecg.peaks_sample)))))
-            self.sbp_value.setText("SBP: " + str(self.laser_exp.results['SBP_Mean']))
+            try:
+                self.sbp_value.setText("SBP: " + str(self.laser_exp.results['SBP_Mean']))
+            except Exception as e:
+                print(e)
             self.map_value.setText("MAP: " + str(self.laser_exp.results['MAP_Mean']))
 
             dual_laser_window = DualLaserWindow(laser1_array_ys=100*(np.exp(self.laser_exp.laser1_magic_data_all)-1),
@@ -465,7 +501,10 @@ class LaserGui(QtWidgets.QWidget):
             print("Image Saved")
 
     def calc_hrv(self):
-        self.laser_exp.ecg.calc_ecg_peaks()
+        ecg_hint = self.laser_exp.hints['Period']
+        print(ecg_hint)
+
+        self.laser_exp.ecg.calc_ecg_peaks(ecg_hint=ecg_hint)
         self.hrv_xs = self.laser_exp.ecg.peaks_sample[1:]
         self.hrv_ys = 60000/np.diff(self.laser_exp.ecg.peaks_sample)
         self.ecg_peaks_x = self.laser_exp.ecg.peaks_sample

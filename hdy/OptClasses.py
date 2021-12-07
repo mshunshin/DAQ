@@ -1,5 +1,5 @@
 import os
-
+import datetime
 from collections import OrderedDict
 
 import numpy as np
@@ -10,7 +10,7 @@ import scipy.interpolate
 
 import mmt
 
-import datetime
+
 
 from . import *
 
@@ -146,17 +146,16 @@ class OptCollection:
                                     temp2['SBP']['Pre'] - temp2['SBP']['Post'])
         temp2['Target_num'] = [mmt.str_to_float(x) for x in temp2['Target']]
 
-        temp3 = temp2[temp2['Target_num']>0].groupby(['Target_num']).agg({'Benefit':{
-            'benefit_mean': 'mean',
-            'benefit_sem': 'sem',
-            'benefit_n': 'count'
-        }})
+        temp3 = temp2[temp2['Target_num'] > 0].groupby(['Target_num'])
+
+        temp3 = temp3.agg(benefit_mean=('Benefit', 'mean'), benefit_sem=('Benefit', 'sem'),
+                          benefit_n=('Benefit', 'count'))
         print(temp3)
 
         tmp = ['Target_num']
-        tmp.extend(temp3.columns.get_level_values(1))
+        # tmp.extend(temp3.columns.get_level_values(1))
         temp3 = temp3.reset_index()
-        temp3.columns = tmp
+        # temp3.columns = tmp
 
         temp3['benefit_upper'] = (temp3['benefit_sem'] * scipy.stats.t.ppf(0.975, df=temp3['benefit_n']))
         temp3['benefit_lower'] = (temp3['benefit_sem'] * scipy.stats.t.ppf(0.975, df=temp3['benefit_n']))
@@ -231,73 +230,75 @@ class OptCollection:
 
 
     def save_settings(self):
-        # Make sure you have send the data down###
-        patient = []
-        period = []
-        experiment = []
-        file = []
-        ecg = []
-        bpao = []
-        bp = []
-        bp_prox = []
-        bp_dist = []
-        boxa = []
-        ref = []
-        pressure = []
-        override_test = []
-        transitions = []
+        try:
+            # Make sure you have send the data down###
+            patient = []
+            period = []
+            experiment = []
+            file = []
+            ecg = []
+            bpao = []
+            bp = []
+            bp_prox = []
+            bp_dist = []
+            boxa = []
+            ref = []
+            pressure = []
+            override_test = []
+            transitions = []
 
-        for pt in self.exp_list:
-            patient.append(self.patient)
-            period.append(self.period)
-            experiment.append(pt.exp)
-            file.append(os.path.split(pt.daq_fl)[1])
-            ecg.append(pt.hints.get('ECG', ''))
-            bpao.append(pt.hints.get('BPAO', ''))
-            boxa.append(pt.hints.get('BoxA', ''))
-            bp.append(pt.hints.get('BP', ''))
-            bp_prox.append(pt.hints.get('bp_prox', ''))
-            bp_dist.append(pt.hints.get('bp_dist', ''))
-            ref.append(pt.ref)
-            pressure.append(pt.hints.get('Pressure', ''))
-            override_test.append(pt.override_test)
-            transitions.append(" ".join(map(str, pt.final_transitions_sample)))
+            for pt in self.exp_list:
+                patient.append(self.patient)
+                period.append(self.period)
+                experiment.append(pt.exp)
+                file.append(os.path.split(pt.daq_fl)[1])
+                ecg.append(pt.hints.get('ECG', ''))
+                bpao.append(pt.hints.get('BPAO', ''))
+                boxa.append(pt.hints.get('BoxA', ''))
+                bp.append(pt.hints.get('BP', ''))
+                bp_prox.append(pt.hints.get('bp_prox', ''))
+                bp_dist.append(pt.hints.get('bp_dist', ''))
+                ref.append(pt.ref)
+                pressure.append(pt.hints.get('Pressure', ''))
+                override_test.append(pt.override_test)
+                transitions.append(" ".join(map(str, pt.final_transitions_sample)))
 
-        db = pd.DataFrame(OrderedDict([('Patient', patient),
-                                       ('Period', period),
-                                       ('Experiment', experiment),
-                                       ('File', file),
-                                       ('ECG', ecg),
-                                       ('BPAO', bpao),
-                                       ('BP', bp),
-                                       ('bp_prox', bp_prox),
-                                       ('bp_dist', bp_dist),
-                                       ('BoxA', boxa),
-                                       ('Pressure', pressure),
-                                       ('Ref', ref),
-                                       ('Override_Test', override_test),
-                                       ('Transitions', transitions)]))
+            db = pd.DataFrame(OrderedDict([('Patient', patient),
+                                           ('Period', period),
+                                           ('Experiment', experiment),
+                                           ('File', file),
+                                           ('ECG', ecg),
+                                           ('BPAO', bpao),
+                                           ('BP', bp),
+                                           ('bp_prox', bp_prox),
+                                           ('bp_dist', bp_dist),
+                                           ('BoxA', boxa),
+                                           ('Pressure', pressure),
+                                           ('Ref', ref),
+                                           ('Override_Test', override_test),
+                                           ('Transitions', transitions)]))
 
-        now = datetime.datetime.now().isoformat()[0:19].replace(":", "").replace("-", "")
+            now = datetime.datetime.now().isoformat()[0:19].replace(":", "").replace("-", "")
 
-        settings_fn = self.patient + "-" + self.period + "-" + now + "-Haem.csv"
-        results_fn = self.patient + "-" + self.period + "-" + now + "-Results.csv"
-        summary_fn = self.patient + "-" + self.period + "-" + now + "-Summary.csv"
+            settings_fn = self.patient + "-" + self.period + "-" + now + "-Haem.csv"
+            results_fn = self.patient + "-" + self.period + "-" + now + "-Results.csv"
+            summary_fn = self.patient + "-" + self.period + "-" + now + "-Summary.csv"
 
-        settings_fl = os.path.join(self.save_dir, settings_fn)
-        results_fl = os.path.join(self.save_dir, results_fn)
-        summary_fl = os.path.join(self.save_dir, summary_fn)
+            settings_fl = os.path.join(self.save_dir, settings_fn)
+            results_fl = os.path.join(self.save_dir, results_fn)
+            summary_fl = os.path.join(self.save_dir, summary_fn)
 
-        print("Saving Settings: ", settings_fl)
-        db.to_csv(settings_fl, index=False)
-        print("Saving Results: ", results_fl)
-        self.final_results_db.to_csv(results_fl, index=False)
-        print("Saving Summary:", summary_fl)
+            print("Saving Settings: ", settings_fl)
+            db.to_csv(settings_fl, index=False)
+            print("Saving Results: ", results_fl)
+            self.final_results_db.to_csv(results_fl, index=False)
+            print("Saving Summary:", summary_fl)
 
-        rp = self.results_plot
-        res_sum = pd.DataFrame({'Delay': rp['x_all'], 'Benefit': rp['y_all']})
-        res_sum.to_csv(summary_fl, index=False)
-
+            rp = self.results_plot
+            res_sum = pd.DataFrame({'Delay': rp['x_all'], 'Benefit': rp['y_all']})
+            res_sum.to_csv(summary_fl, index=False)
+        except Exception as e:
+            print(e)
 
 class OptAnalysis:
 

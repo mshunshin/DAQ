@@ -1,7 +1,7 @@
-import sys
+
 import numpy as np
-import scipy.signal
 import scipy.ndimage
+import scipy.signal
 
 
 def kathirvel_ecg(
@@ -20,7 +20,6 @@ def kathirvel_ecg(
     with some tweaks (mainly robust estimation of the rectified signal
     cutoff threshold).
     """
-
     ransac_window_size = int(ransac_window_size * rate)
 
     # Square (=signal power) of the first difference of the signal

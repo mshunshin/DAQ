@@ -10,40 +10,82 @@ import scipy.signal
 import scipy.fftpack
 import scipy.interpolate
 
+
+import sklearn
+from sklearn.pipeline import make_pipeline
+from sklearn.linear_model import LinearRegression, RANSACRegressor, TheilSenRegressor, HuberRegressor
+from sklearn.metrics import r2_score
+
+
 import mmt
 
 from . import *
 
 PR_DELAY = 120
 
+class BSplineFeatures(sklearn.base.TransformerMixin):
+    def __init__(self, knots, degree=3, periodic=False):
+        self.bsplines = self.get_bspline_basis(knots, degree, periodic=periodic)
+        self.nsplines = len(self.bsplines)
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        nsamples, nfeatures = X.shape
+        features = np.zeros((nsamples, nfeatures * self.nsplines))
+        for ispline, spline in enumerate(self.bsplines):
+            istart = ispline * nfeatures
+            iend = (ispline + 1) * nfeatures
+            features[:, istart:iend] = scipy.interpolate.splev(X, spline)
+        return features
+
+    def get_bspline_basis(self, knots, degree=3, periodic=False):
+        """Get spline coefficients for each basis spline."""
+        nknots = len(knots)
+        y_dummy = np.zeros(nknots)
+
+        knots, coeffs, degree = scipy.interpolate.splrep(knots, y_dummy, k=degree,
+                                          per=periodic)
+        ncoeffs = len(coeffs)
+        bsplines = []
+        for ispline in range(nknots):
+            coeffs = [1.0 if ispl == ispline else 0.0 for ispl in range(ncoeffs)]
+            bsplines.append((knots, coeffs, degree))
+        return bsplines
+
 class LaserAnalysis(object):
 
-    def __init__(self, database_dir, database_fn, patient, exp, mode="normal"):
-
-        self.database_dir = database_dir
-        self.database_fn = database_fn
-        self.patient = patient
-        self.exp = exp
-        self.mode = mode
-
-        self.database_fl = os.path.join(database_dir, database_fn)
-
-        db = pd.read_csv(self.database_fl)
-        row = db[(db.Patient == patient) & (db.Experiment == exp)].iloc[0]
-
-        self.hints = row
-
-        self.zip_fl = os.path.join(database_dir, patient, "Haem", row.File)
-        self.daq_raw = daq_raw = DAQ_File(*os.path.split(self.zip_fl))
+    def __init__(self, database_dir=None, database_fn=None, patient=None, exp=None, zip_fl=None, mode="normal"):
 
         self.results = collections.OrderedDict()
-        self.freq_hint = float(getattr(self.hints, 'Freq_Hint', 1))
-        self.ecg_hint = getattr(self.hints, 'ECG_Hint', "Sinus")
-        self.period = getattr(self.hints, 'Period', "Undefined")
+        self.results_beatbybeat = collections.OrderedDict()
 
-        print("Loading: {0}".format(self.zip_fl))
-        print("Experiment: {0}".format(self.exp))
-        print("Patient: {0}".format(self.patient))
+        if zip_fl is None:
+            self.database_dir = database_dir
+            self.database_fn = database_fn
+            self.patient = patient
+            self.exp = exp
+            self.mode = mode
+
+            self.database_fl = os.path.join(database_dir, database_fn)
+
+            db = pd.read_csv(self.database_fl)
+            row = db[(db.Patient == patient) & (db.Experiment == exp)].iloc[0]
+
+            self.hints = row
+
+            self.zip_fl = os.path.join(database_dir, patient, "Haem", row.File)
+            self.daq_raw = daq_raw = DAQ_File(*os.path.split(self.zip_fl))
+
+            self.freq_hint = float(getattr(self.hints, 'Freq_Hint', 1))
+            self.ecg_hint = getattr(self.hints, 'ECG_Hint', "Sinus")
+            self.period = getattr(self.hints, 'Period', "Undefined")
+            self.notes = getattr(self.hints, "Notes", "NA")
+
+            print("Loading: {0}".format(self.zip_fl))
+            print("Experiment: {0}".format(self.exp))
+            print("Patient: {0}".format(self.patient))
 
 
         try:
@@ -86,16 +128,20 @@ class LaserAnalysis(object):
         end = int(self.end)
 
         self.init_results()
-        self.ecg.calc_ecg_peaks(begin=begin, end=end, ecg_hint=self.hints['Period'])
+
+        ecg_hint = self.hints['Period']
+        print(ecg_hint)
+        self.ecg.calc_ecg_peaks(begin=begin, end=end, ecg_hint=ecg_hint)
 
         try:
             self.pressure.calc_peaks(begin=begin, end=end)
         except Exception as e:
             print(e)
 
-        self.calc_fft_results(begin=begin, end=end)
-        self.calc_magic_results(begin=begin, end=end, laser="laser1")
-        self.calc_magic_results(begin=begin, end=end, laser="laser2")
+        if True:
+            self.calc_fft_results(begin=begin, end=end)
+            self.calc_magic_results(begin=begin, end=end, laser="laser1")
+            self.calc_magic_results(begin=begin, end=end, laser="laser2")
 
         envelope1_data = mmt.butter_bandpass_filter(self.laser1.data[begin:end], 0.5, 5, 1000, order=2)
         envelope1_data = np.abs(scipy.signal.hilbert(envelope1_data))
@@ -113,12 +159,31 @@ class LaserAnalysis(object):
         self.results['Laser2_SJM'] = np.mean(envelope2_data)
         self.results['Median_RR'] = int(np.median(np.diff(self.ecg.peaks_sample)))
 
+        for i, sbp in enumerate(self.pressure.peaks_value):
+            self.results_beatbybeat['Patient'].append(self.patient)
+            self.results_beatbybeat['Experiment'].append(self.exp)
+            self.results_beatbybeat['File'].append(self.hints["File"])
+            self.results_beatbybeat['Period'].append(self.period)
+            self.results_beatbybeat['Notes'].append(self.notes)
+            self.results_beatbybeat["Beat"].append(i)
+            self.results_beatbybeat["SBP"].append(sbp)
+
+        pass
+
     def init_results(self):
-        results = self.results
-        results['Patient'] = self.patient
-        results['Experiment'] = self.exp
-        results['File'] = self.hints["File"]
-        results['Period'] = self.period
+        self.results['Patient'] = self.patient
+        self.results['Experiment'] = self.exp
+        self.results['File'] = self.hints["File"]
+        self.results['Period'] = self.period
+        self.results['Notes'] = self.notes
+
+        self.results_beatbybeat['Patient'] = []
+        self.results_beatbybeat['Experiment'] = []
+        self.results_beatbybeat['File'] = []
+        self.results_beatbybeat['Period'] = []
+        self.results_beatbybeat['Notes'] = []
+        self.results_beatbybeat['Beat'] = []
+        self.results_beatbybeat["SBP"] = []
 
 
     def calc_fft_results(self, begin=None, end=None):
@@ -163,6 +228,10 @@ class LaserAnalysis(object):
         else:
             ecg_peaks_sample = self.ecg.peaks_sample - begin
 
+        ecg_peaks_sample_raw = ecg_peaks_sample.copy()
+
+        laser_data = self[laser].data[begin:end+2000]
+
 
         if 'atrial' in self.mode:
             ecg_peaks_sample = ecg_peaks_sample - PR_DELAY
@@ -183,63 +252,95 @@ class LaserAnalysis(object):
             ecg_peaks_sample = np.array(sorted(set(np.random.uniform(0,(end-begin),(end-begin)//250).astype(np.int))))
 
         if 'double_count_fix' in self.mode:
-            LOOP_NUMBER = 2 #Loop through all, then take the best magic result. But to save time pick 2.
-            test_intervals = [300, 400, 800, 1000, 1200, 1500]
-            test_latitude = 150
-            test_interval = test_intervals[LOOP_NUMBER]
 
-            out = []
-            ecg_peaks_sample = list(ecg_peaks_sample)
-            ecg_peaks_sample.pop(0)
-            out.append(ecg_peaks_sample[0])
-            last_missed = False
-            for sample in ecg_peaks_sample:
-                if last_missed:
-                    out.append(sample)
-                    last_missed = False
-                    continue
-                else:
-                    if sample - out[-1] < test_interval:
-                        last_missed = True
+            test_intervals = np.array([300, 400, 800, 1000, 1200, 1500, 300, 400, 800, 1000, 1200, 1500])
+            test_ignore_first_list = np.array([False,False,False,False,False,False, True, True, True, True, True, True])
+            test_ecg_peaks_sample = []
+            results_magic = np.zeros_like(test_intervals)
+
+            for i, (test_interval, test_ignore_first) in enumerate(zip(test_intervals, test_ignore_first_list)):
+                pass
+
+                out = []
+                ecg_peaks_sample = list(ecg_peaks_sample_raw)
+                if test_ignore_first:
+                    ecg_peaks_sample.pop(0)
+                first = ecg_peaks_sample.pop(0)
+                out.append(first)
+                last_missed = False
+                for sample in ecg_peaks_sample:
+                    if last_missed:
+                        out.append(sample)
+                        last_missed = False
                         continue
                     else:
-                        out.append(sample)
+                        if sample - out[-1] < test_interval:
+                            last_missed = True
+                            continue
+                        else:
+                            out.append(sample)
 
-            ecg_peaks_sample = np.array(out)
+                test_ecg = np.array(out)
+                test_ecg_peaks_sample.append(test_ecg)
+                result = LaserAnalysis._calc_laser_magic(test_ecg, laser_data)
+                if result.conf_value < 25:
+                    results_magic[i] = -100
+                else:
+                    results_magic[i] = result.magic_value
 
 
-        laser_data = self[laser].data[begin:end]+10
-        laser_data = np.log(laser_data) + laser_data/100
-        laser_data = mmt.butter_bandpass_filter(laser_data, 0.5, 25.0, 1000, order=2)
+            max_idx = np.nanargmax(results_magic)
+            ecg_peaks_sample = test_ecg_peaks_sample[max_idx]
 
-        print("ecg_peaks ", ecg_peaks_sample)
+        result = LaserAnalysis._calc_laser_magic(ecg_peaks_sample, laser_data)
+
+        self[laser + '_min_idx'] = result.min_idx
+        self[laser + '_min_idx'] = result.max_idx
+        self[laser + '_magic_data_all'] = result.magic_data_all
+        self[laser + '_magic_data'] = result.magic_data
+        self[laser + '_magic_value'] = self.results[laser.title() + '_Magic'] = result.magic_value
+        self[laser + '_conf_value'] = self.results[laser.title() + '_Conf'] = result.conf_value
+
+    @staticmethod
+    def _calc_laser_magic(ecg_peaks_sample, laser_data):
+
+        laser_data = laser_data + 10
+        laser_data = np.log(laser_data) + laser_data/200
+        laser_data = mmt.butter_bandpass_filter(laser_data, 0.5, 25.0, fs=1000, order=2)
+        laser_data = scipy.signal.savgol_filter(laser_data,11,3)
+
+        print(f"ecg_peaks: {ecg_peaks_sample}")
 
 
         mean_RR = int(4*(np.mean(np.diff(ecg_peaks_sample))//4))
         median_RR = int(np.median(np.diff(ecg_peaks_sample)))
-        print("Mean {0} RR".format(mean_RR))
-        print("Median {0} RR".format(median_RR))
+        print(f"Mean {mean_RR} RR")
+        print(f"Median {median_RR} RR")
 
+        if True:
+            laser_peaks = mmt.find_peaks.find_peaks_cwt_refined(-laser_data, np.array([20,50,100,150,200,300,500]), decimate=True, decimate_factor=10)
 
-        laser_peaks = mmt.find_peaks.find_peaks_cwt_refined(-laser_data, np.array([20,50,100,150,200,300,500]), decimate=True, decimate_factor=10)
+            outer_delay = np.subtract.outer(ecg_peaks_sample, laser_peaks)
+            outer_delay[outer_delay>=0] = -100000
 
-        outer_delay = np.subtract.outer(ecg_peaks_sample, laser_peaks)
-        outer_delay[outer_delay>=0] = -100000
+            outer_delay_max = np.max(outer_delay, axis=1)
 
-        outer_delay_max = np.max(outer_delay, axis=1)
+            shift = np.int(-np.median(outer_delay_max))
 
-        shift = np.int(-np.median(outer_delay_max))
+            if shift <0:
+                shift = 0
 
-        if shift <0:
-            shift = 0
+            if shift > 1000:
+                shift = 0
 
-        if shift > 1000:
-            shift = 0
+            print("shift: ", shift)
 
-        print("shift: ", shift)
+            pre_shift = shift
+            post_shift = shift
 
-        pre_shift = shift
-        post_shift = shift
+        else:
+            pre_shift = 0
+            post_shift = 0
 
         laser_sum = np.zeros(1000)
         inc_peaks = 0
@@ -253,13 +354,16 @@ class LaserAnalysis(object):
             beat_end = ecg_peaks_sample[i+1] + post_shift
 
             if beat_end > len(laser_data):
+                print("Not enough laser data after shifting")
                 continue
 
-            if self.hints['Period'].lower() != "vf":
-                if abs((beat_end-beat_begin)-median_RR) > median_RR*0.3:
-                    print("ectopic ignored")
-                    continue
+            if beat_end - beat_begin > median_RR * 2:
+                print("Hello")
+                continue
 
+            if beat_end - beat_begin < median_RR * 0.5:
+                print("Hello")
+                continue
 
             laser_temp = laser_data[beat_begin:beat_end]
 
@@ -272,39 +376,49 @@ class LaserAnalysis(object):
             inc_peaks = inc_peaks+1
 
 
-        temp = np.array(laser_list)
-        print(temp.shape)
+        laser_ar = np.array(laser_list)
 
-        laser_magic = laser_sum/ inc_peaks
-        laser_magic = scipy.signal.savgol_filter(laser_magic, 101, 3)
+        knots = np.linspace(0, 1000, 11)
+        bspline_features = BSplineFeatures(knots, degree=3, periodic=False)
 
-        error = np.mean((temp - laser_magic[None,:])**2)
+        x_fit = np.arange(1000).repeat(laser_ar.shape[0]).ravel()
+        y_fit = laser_ar.T.ravel()
+
+        model = make_pipeline(bspline_features, HuberRegressor())
+        model.fit(x_fit[:,None], y_fit)
+
+        x_predict = np.arange(0,1000)
+        y_predict = model.predict(x_predict[:,None])
+
+        laser_magic = y_predict
+
+        y_predict_all = model.predict(x_fit[:, None])
+        conf_pct = r2_score(y_fit, y_predict_all) * 100
+
+        if laser_ar.shape[0] <3:
+            conf_pct = -1
+
+        laser_max_idx = np.argmax(laser_magic)
+        laser_min_idx = np.argmin(laser_magic)
+
+        laser_ptp = laser_magic[laser_max_idx] - laser_magic[laser_min_idx]
+
+        laser_magic_value = 100 * (np.exp((laser_ptp) / 2) - 1)
+
+        from collections import namedtuple
+
+        MagicResults = namedtuple('MagicResults', ['max_idx', 'min_idx', 'magic_data_all', 'magic_data', 'magic_value', 'conf_value'])
+
+        print(f"Laser Value{laser_ptp}, Laser Conf{conf_pct}")
+
+        out = MagicResults(max_idx = laser_min_idx,
+                           min_idx = laser_min_idx,
+                           magic_data_all = laser_ar,
+                           magic_data = laser_magic,
+                           magic_value = laser_magic_value,
+                           conf_value = conf_pct)
+
+        return out
 
 
-        laser_max_results = scipy.signal.argrelmax(laser_magic, order=mean_RR//2)[0]
-        #laser_min_results = scipy.signal.argrelmin(laser_magic, order=mean_RR//2)[0]
-        laser_min_results = np.array([0])
-
-        if (len(laser_max_results) < 1) or (len(laser_min_results)<1):
-            laser_ptp = 0
-        else:
-            laser_max_idx = laser_max_results[0]
-            laser_min_idx = laser_min_results[0]
-            laser_ptp = laser_magic[laser_max_idx] - laser_magic[laser_min_idx]
-            self[laser + '_max_idx'] = laser_max_idx
-            self[laser + '_min_idx'] = laser_min_idx
-
-        laser_magic_value = 100*(np.exp((laser_ptp)/2)-1)
-
-        conf = error/(laser_ptp+0.0001)**2
-        conf_pct = 100*(1-conf)
-        if conf_pct < 0:
-            conf_pct = 0
-
-        print(error, laser_ptp, conf_pct)
-
-        self[laser + '_magic_data_all'] = temp
-        self[laser + '_magic_data'] = laser_magic
-        self[laser + '_magic_value'] = self.results[laser.title() + '_Magic'] = laser_magic_value
-        self[laser + '_conf_value'] = self.results[laser.title() + '_Conf'] = conf_pct
 

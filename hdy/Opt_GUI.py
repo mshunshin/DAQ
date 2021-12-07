@@ -680,9 +680,10 @@ class OptimWidget(QtWidgets.QWidget):
     def toggle_dpdt(self):
         if self.optim_exp.pressure.data_type == 'clean':
             self.optim_exp.pressure.set_dpdt()
+            self.optim_exp.pressure.calc_peaks(dpdt=True)
         else:
             self.optim_exp.pressure.set_clean()
-        self.optim_exp.pressure.calc_peaks()
+            self.optim_exp.pressure.calc_peaks(dpdt=False)
         self.update_data()
         self.pressure_pw.autoRange()
 
@@ -693,6 +694,8 @@ class OptimWidget(QtWidgets.QWidget):
     def add_transition(self):
         vr = self.pressure_pi.getViewBox().viewRange()
         xpos = (vr[0][0] + vr[0][1])/2
+
+        self.optim_exp.final_transitions_sample = list(self.optim_exp.final_transitions_sample)
 
         self.optim_exp.final_transitions_sample.append(int(xpos))
         self.optim_exp.final_transitions_dir.append("AO")

@@ -1,6 +1,9 @@
 import os
 import zipfile
 
+import scipy.signal
+from scipy.interpolate import interp1d
+
 from collections import defaultdict
 
 import numpy as np
@@ -11,7 +14,7 @@ class DAQ_File():
 
         if channels is None:
             channels = ["ecg", "boxa", "boxb", "BP", "bpao", "plethg", "plethi", "plethr", "plethh", "qfin",
-                     "Resp", "pot", "flow", "spO2", "pot", "bp_prox", "bp_dist", "bp"]
+                     "Resp", "pot", "flow", "spO2", "pot", "bp_prox", "bp_dist", "bp", "ld"]
 
         sources = []
 
@@ -43,7 +46,16 @@ class DAQ_File():
             for file in channels:
                 try:
                     file_f = zip_f.open(file + ".txt", 'r')
-                    setattr(self, file, self.fast_load_txt(file_f))
+                    file_d = self.fast_load_txt(file_f)
+                    print(f'file:{file}, shape{file_d.shape}')
+
+                    if file == 'ld':
+                        ld_inter = interp1d(np.arange(file_d.shape[0]), file_d)
+                        out_x = np.linspace(0, file_d.shape[0]-1, self.ecg.shape[0])
+
+                        file_d = ld_inter(out_x)
+
+                    setattr(self, file, file_d)
                 except Exception as e:
                     print("Exception", e)
                 else:

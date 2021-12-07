@@ -20,7 +20,6 @@ def calc_magic_laser(ecg_data, laser_data, no_log=False):
 
     print("ecg_peaks ", ecg_peaks_sample)
 
-
     mean_RR = int(4*(np.mean(np.diff(ecg_peaks_sample))//4))
     median_RR = int(np.median(np.diff(ecg_peaks_sample)))
     print("Mean {0} RR".format(mean_RR))

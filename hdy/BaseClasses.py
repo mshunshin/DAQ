@@ -19,7 +19,7 @@ import sklearn.cluster
 import mmt
 
 
-class DAQSignal():
+class DAQSignal:
     def __init__(self, data, sampling_rate, scale=1):
         self.sampling_rate = sampling_rate
         self.data = data * scale
@@ -58,44 +58,8 @@ class DAQContainerECG(DAQSignal):
     def __init__(self, ecg_hint='sinus', **kwds):
         super().__init__(**kwds)
 
-        self.data = mmt.butter_bandpass_filter(self.data, 0.5, 49, self.sampling_rate, order=2)
-
-        #self.data = scipy.signal.savgol_filter(self.data, 31, 3)
+        self.data = mmt.butter_bandpass_filter(self.data, 0.5, 40, self.sampling_rate, order=5)
         self.ecg_hint = ecg_hint
-
-    def calc_ecg_peaks_pt(self, begin=None, end=None):
-        print("Calculating ECG Peaks")
-
-        data = self.data[begin:end]
-
-        data = mmt.butter_bandpass_filter(data, 0.5, 30, 1000,2)
-
-        sampling_rate = self.sampling_rate
-
-        if len(data) / sampling_rate < 8:
-            sampling_rate = len(data) / 8
-
-        ecg_pt = mmt.ecg.PTQRSD(data, {'samplingrate': sampling_rate})
-        provisional_ecg_peaks_x = ecg_pt.qrsDetect()
-
-        relmax_peaks = scipy.signal.argrelmax(np.abs(data), order=10)[0]
-        final_peaks_x = []
-        for peak in provisional_ecg_peaks_x:
-            final_peaks_x.append(mmt.find_nearest_value(relmax_peaks, peak))
-
-        if final_peaks_x[0] < 250:
-            final_peaks_x = np.delete(final_peaks_x, 0)
-
-        if final_peaks_x[-1] > len(data) - 250:
-            final_peaks_x = np.delete(final_peaks_x, -1)
-
-        peaks_sample = np.array(final_peaks_x)
-        print("Finished calculating ECG Peaks")
-
-        if begin == None:
-            self.peaks_sample = peaks_sample
-        else:
-            self.peaks_sample = peaks_sample + begin
 
     def calc_ecg_peaks(self, begin=None, end=None, ecg_hint='sinus'):
         print("Calculating ECG Peaks")
@@ -110,9 +74,15 @@ class DAQContainerECG(DAQSignal):
                     end = min(self.data.shape[0], 40000+begin)
 
         data = self.data[begin:end]
-        data_dec = scipy.signal.decimate(data, 10, zero_phase=True)
+        #data_dec = scipy.signal.decimate(data, 10, zero_phase=True)
 
         if ecg_hint.lower() == "vf":
+            print(f'ECG_Hint was vf')
+            relmax_peaks = scipy.signal.argrelmax(data, order=50)[0]
+            peaks_sample = np.array(relmax_peaks)
+
+        elif ecg_hint.lower() == "old-vf":
+            print(f'ECG_Hint was old-vf')
             ecg_detect = bn.move_sum(np.diff(data_dec) ** 2, 4, 1)
             ecg_detect[ecg_detect < np.max(ecg_detect) // 10] = 0
             ecg_detect_peaks = np.array(
@@ -125,16 +95,13 @@ class DAQContainerECG(DAQSignal):
                 final_peaks.append(mmt.find_nearest_value(relmax_peaks, peak))
             peaks_sample = np.array(relmax_peaks)
 
-
         else:
-            ecg_detect_peaks = mmt.ecg.kathirvel_ecg(data,1000)
-            relmax_peaks = scipy.signal.argrelmax(np.abs(data), order=200)[0]
+            print(f'ECG_Hint was not vf')
 
-            final_peaks = []
-            for peak in ecg_detect_peaks:
-                final_peaks.append(mmt.find_nearest_value(relmax_peaks, peak))
+            ecgdetector = mmt.ecg.ECGDetectors(1000)
+            ecg_detect_peaks = ecgdetector.matt_detector(data)
 
-            peaks_sample = np.array(final_peaks)
+            peaks_sample = ecg_detect_peaks
 
         print("Finished calculating ECG Peaks")
 
@@ -152,47 +119,6 @@ class DAQContainerECG(DAQSignal):
             peaks_sample = peaks_sample[peaks_sample < req_end]
 
         self.peaks_sample = peaks_sample
-
-    def calc_ecg_peaks_wavelet(self, begin=None, end=None, ecg_hint='sinus'):
-        print("Calculating ECG Peaks")
-
-        data = self.data[begin:end]
-
-        data_dec = scipy.signal.decimate(data, 10, zero_phase=True)
-
-        if ecg_hint.lower() != "vf":
-            ecg_detect = bn.move_sum(np.diff(data_dec) ** 2, 20, 1)
-            ecg_detect[ecg_detect < np.max(ecg_detect) // 10] = 0
-            ecg_detect_peaks = np.array(scipy.signal.find_peaks_cwt(ecg_detect, widths=np.linspace(20, 40, 2), noise_perc=30))*10
-            ecg_detect_peaks = ecg_detect_peaks + 75
-
-            relmax_peaks = scipy.signal.argrelmax(np.abs(data), order=300)[0]
-            final_peaks = []
-            for peak in ecg_detect_peaks:
-                final_peaks.append(mmt.find_nearest_value(relmax_peaks, peak))
-
-        else:
-            ecg_detect = bn.move_sum(np.diff(data_dec) ** 2, 5, 1)
-            ecg_detect[ecg_detect < np.max(ecg_detect) // 10] = 0
-            ecg_detect_peaks = np.array(scipy.signal.find_peaks_cwt(ecg_detect, widths=np.linspace(10, 20, 2), noise_perc=30))*10
-            ecg_detect_peaks = ecg_detect_peaks + 25
-
-            relmax_peaks = scipy.signal.argrelmax(np.abs(data), order=50)[0]
-
-            final_peaks = []
-            for peak in ecg_detect_peaks:
-                final_peaks.append(mmt.find_nearest_value(relmax_peaks, peak))
-
-        peaks_sample = np.array(final_peaks)
-
-        print("Finished calculating ECG Peaks")
-
-        peaks_sample = np.sort(list(set(peaks_sample)))
-
-        if begin == None:
-            self.peaks_sample = peaks_sample
-        else:
-            self.peaks_sample = peaks_sample + begin
 
     @property
     def peaks_value(self):
@@ -310,28 +236,6 @@ class DAQContainerECG(DAQSignal):
 
 
 
-
-    def plot_LombScargle(self, fig_fl=False):
-
-        plt.ioff()
-        fig = plt.figure(figsize=(10,8))
-
-        fq = (self.LombScargle.freqs >= 0.04) & (self.LombScargle.freqs <= 0.4)
-
-        ax_ls = fig.add_subplot(111)
-        ax_ls.plot(self.LombScargle.freqs[fq], scipy.ndimage.filters.gaussian_filter1d(self.LombScargle.power[fq],100))
-        ax_ls.set_xlim([0.04,0.4])
-        ax_ls.set_xlabel("Frequency (Hz)")
-        ax_ls.set_ylabel("Power")
-
-        if fig_fl:
-            fig_dir, _ = os.path.split(fig_fl)
-            os.makedirs(fig_dir, exist_ok=True)
-            fig.savefig(fig_fl, dpi=300)
-            plt.close()
-        else:
-            plt.show()
-
     @property
     def SDNN(self):
         peaks_sample = self.peaks_sample.astype(np.float)
@@ -342,40 +246,6 @@ class DAQContainerECG(DAQSignal):
 
         sdnn = np.std(ys)
         return sdnn
-
-    def plot_SDNN(self, fig_fl=False):
-
-        plt.ioff()
-        fig = plt.figure(figsize=(10,8))
-
-        ax_sdnn = fig.add_subplot(111)
-        ax_sdnn.hist(np.diff(self.peaks_sample), bins=40)
-        ax_sdnn.set_xlim([500,1500])
-        ax_sdnn.set_xlabel("NN Interval")
-        ax_sdnn.set_ylabel("Frequency")
-
-        if fig_fl:
-            fig_dir, _ = os.path.split(fig_fl)
-            os.makedirs(fig_dir, exist_ok=True)
-            fig.savefig(fig_fl, dpi=300)
-            plt.close()
-        else:
-            plt.show()
-
-    def plot_peaks(self):
-        plt.plot(self.data, "r-")
-        plt.plot(self.peaks_sample, self.peaks_value, "ro")
-        plt.show()
-
-    def plot_peaks_code(self):
-        labels = self.peaks_code
-        ecg_peaks_value = self.peaks_value
-        plt.plot(self.data, "r-")
-        plt.plot(self.peaks_sample[labels == 0], ecg_peaks_value[labels == 0], "bo")
-        plt.plot(self.peaks_sample[labels == 1], ecg_peaks_value[labels == 1], "go")
-        # for xi in self.final_ecg_transitions_sample:
-        #    plt.axvline(xi, linestyle='-', linewidth=2, color='k')
-        plt.show()
 
 
 class DAQContainerBPAO(DAQSignal):
@@ -393,6 +263,7 @@ class DAQContainerBPAO(DAQSignal):
         data_dpdt[1:] = np.diff(data_clean)
         data_dpdt[0] = data_dpdt[1]
         data_dpdt = data_dpdt * self.sampling_rate
+        data_dpdt = scipy.signal.savgol_filter(data_dpdt, savgol_width, 3)
         self.data_dpdt = data_dpdt
         self.data_clean = data_clean
 
@@ -404,13 +275,18 @@ class DAQContainerBPAO(DAQSignal):
         self.data = self.data_clean
         self.data_type = 'clean'
 
-    def calc_peaks(self, begin=None, end=None):
+    def calc_peaks(self, begin=None, end=None, dpdt=False):
         data = self.data[begin:end]
         sampling_rate = self.sampling_rate
 
         print("Calculating BP Peaks")
-        widths = np.arange(sampling_rate // 20, sampling_rate // 3, sampling_rate // 20)
-        peaks_sample = mmt.find_peaks.find_peaks_cwt_refined(data, widths, decimate=True)
+        if dpdt:
+            widths = np.arange(sampling_rate // 40, sampling_rate // 6, sampling_rate // 40)
+        else:
+            widths = np.arange(sampling_rate // 20, sampling_rate // 3, sampling_rate // 20)
+        widths = np.arange(2*(sampling_rate // 12), 6*(sampling_rate // 12), sampling_rate // 12)
+
+        peaks_sample = mmt.find_peaks.find_peaks_cwt_refined(data, widths, decimate=True, noise_perc=30)
         print("Finished calculating BP peaks")
 
         if begin == None:
@@ -425,87 +301,15 @@ class DAQContainerBPAO(DAQSignal):
 
 
 
-class DAQContainerBP(DAQSignal):
+class DAQContainerBP(DAQContainerBPAO):
     def __init__(self, data, sampling_rate, scale=100, **kwds):
+
+        ##Get rid of extreem finopress data.
+        data[data < -10] = 0
+        data[data > 500] = 500
+
         super().__init__(data=data, sampling_rate=sampling_rate, scale=scale, **kwds)
-        self.data[self.data<-10] = 0
-        self.data[self.data>500] = 500
 
-
-        savgol_width = 2 * (sampling_rate // 10) + 1
-        self.data = scipy.signal.savgol_filter(self.data, savgol_width, 3)
-
-    def calc_peaks(self, begin=None, end=None):
-        data = self.data[begin:end]
-        sampling_rate = self.sampling_rate
-
-        print("Calculating BP Peaks")
-        widths = np.arange(sampling_rate // 20, sampling_rate // 3, sampling_rate // 20)
-        peaks_sample = mmt.find_peaks.find_peaks_cwt_refined(data, widths, decimate=True)
-        print("Finished calculating BP peaks")
-
-        if begin == None:
-            self.peaks_sample = peaks_sample
-        else:
-            self.peaks_sample = peaks_sample + begin
-
-    @property
-    def peaks_value(self):
-        return self.data[self.peaks_sample]
-
-
-    @property
-    def LombScargle(self):
-        fmin = 0.0
-        fmax = 0.4
-        N = 1000
-        df = (fmax - fmin) / N
-        freqs = df + (df * np.arange(N))
-
-        xs = self.peaks_sample.astype(np.float) / self.sampling_rate
-        ys = self.peaks_value.astype(np.float)
-
-        ys_good = np.ones_like(ys, dtype=bool)
-        ys_good[1:] = np.abs(np.diff(ys))<15
-
-        ys = ys[ys_good]
-        xs = xs[ys_good]
-
-        ang_freqs = freqs * 2.0 * np.pi
-        power = scipy.signal.lombscargle(xs, ys - ys.mean(), ang_freqs)
-        len_xs = len(xs)
-        power = power * 2 / (len_xs * ys.std() ** 2)
-
-        LS_Data = namedtuple('LS_Data', ['bp_power', 'bp_freqs', 'bp_totpwr', 'bp_ulf', 'bp_vlf', 'bp_lf', 'bp_hf'])
-
-        return LS_Data(power, freqs, np.sum(power),
-                       np.sum(power[(freqs < 0.003)]),
-                       np.sum(power[(freqs >= 0.003) & (freqs < 0.04)]),
-                       np.sum(power[(freqs >= 0.04) & (freqs < 0.15)]),
-                       np.sum(power[(freqs >= 0.15) & (freqs <= 0.4)]))
-
-
-    def plot_LombScargle(self, fig_fl=False):
-        plt.ioff()
-        fig = plt.figure(figsize=(10, 8))
-
-        results = self.LombScargle
-
-        fq = (results.bp_freqs >= 0.04) & (results.bp_freqs <= 0.4)
-
-        ax_ls = fig.add_subplot(111)
-        ax_ls.plot(results.bp_freqs[fq], scipy.ndimage.filters.gaussian_filter1d(results.bp_power[fq], 100))
-        ax_ls.set_xlim([0.04, 0.4])
-        ax_ls.set_xlabel("Frequency (Hz)")
-        ax_ls.set_ylabel("Power")
-
-        if fig_fl:
-            fig_dir, _ = os.path.split(fig_fl)
-            os.makedirs(fig_dir, exist_ok=True)
-            fig.savefig(fig_fl, dpi=300)
-            plt.close()
-        else:
-            plt.show()
 
 
 class DAQContainerLaser(DAQSignal):
