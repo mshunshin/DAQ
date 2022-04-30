@@ -12,7 +12,7 @@ import mmt
 
 from . import *
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PySide6 import QtCore, QtWidgets, QtGui
 
 import pyqtgraph as pg
 

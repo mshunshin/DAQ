@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'pyqtgraph/canvas/TransformGuiTemplate.ui'
 #
@@ -46,10 +45,9 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
+        Form.setWindowTitle(_translate("Form", "PyQtGraph"))
         self.translateLabel.setText(_translate("Form", "Translate:"))
         self.rotateLabel.setText(_translate("Form", "Rotate:"))
         self.scaleLabel.setText(_translate("Form", "Scale:"))
         self.mirrorImageBtn.setText(_translate("Form", "Mirror"))
         self.reflectImageBtn.setText(_translate("Form", "Reflect"))
-

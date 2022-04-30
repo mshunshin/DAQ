@@ -1,7 +1,8 @@
 #import matplotlib
-#matplotlib.use('Qt5Agg')
+#matplotlib.use('QtAgg')
+
 import os
-os.environ['PYQTGRAPH_QT_LIB'] = 'PyQt5'
+os.environ['PYQTGRAPH_QT_LIB'] = 'PySide6'
 
 import sys
 
@@ -9,12 +10,21 @@ import numpy as np
 import pandas as pd
 import scipy
 
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
 
 import hdy
 
+SELECTION = "get_input"
+
 def main():
-    if False:
+
+    if SELECTION == 'get_input':
+        database_dir = input("Database dir: ")
+        database_fn = input("Filename of csv: ")
+        patient = input("Patient: ")
+        exp = input("Experiment name: ")
+
+    elif False:
         database_dir = '/Volumes/Matt-Data/Box/Kyocera-Data'
         database_fn = 'Matt-Laser.csv'
         patient = 'elaine'
@@ -36,7 +46,8 @@ def main():
         database_fn = 'clin DB.csv'
         patient = 'RR'
         exp = "Exp1"
-        mode = "normal"
+
+    mode = "normal"
 
     app = QtWidgets.QApplication(sys.argv)
     app.setApplicationName("LDPM Viewer")
