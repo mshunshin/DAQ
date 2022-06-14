@@ -9,6 +9,7 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 
+
 class DAQ_File():
     def __init__(self, zip_dir, zip_fn, channels = None, search_for_files = False):
 
