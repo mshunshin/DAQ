@@ -44,11 +44,11 @@ def smooth(x, window_len=10, window='hanning'):
     if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
         raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
 
-    s=np.r_[2*x[0]-x[window_len:1:-1], x, 2*x[-1]-x[-1:-window_len:-1]]
+    s = np.r_[2*x[0]-x[window_len:1:-1], x, 2*x[-1]-x[-1:-window_len:-1]]
     #print(len(s))
     
-    if window == 'flat': #moving average
-        w = np.ones(window_len,'d')
+    if window == 'flat':  #moving average
+        w = np.ones(window_len, 'd')
     else:
         w = getattr(np, window)(window_len)
     y = np.convolve(w/w.sum(), s, mode='same')

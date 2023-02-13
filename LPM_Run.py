@@ -12,8 +12,8 @@ import hdy
 #database_dir = '/Volumes/Matt-Data/Dropbox/DK_PhD/DATA/Exercise_Laser/'
 #database_fn = 'Exercise-DB.csv'
 
-#database_dir = '/Volumes/Matt-Data/Dropbox/DK_PhD/DATA/VT Mechanisms and Termination/'
-#database_fn = 'TREAT DB.csv'
+database_dir = '/Volumes/Matt-Data/Dropbox/DK_PhD/DATA/VT Mechanisms and Termination/'
+database_fn = 'TREAT DB.csv'
 
 #database_dir = '/Volumes/Matt-Data/Dropbox/DK_PhD/DATA/VT Mechanisms and Termination/'
 #database_fn = 'TREAT DB.csv'
@@ -21,14 +21,7 @@ import hdy
 #database_dir = '/Volumes/Matt-Data/Dropbox/DK_PhD/DATA/DKEPS/'
 #database_fn = 'EPS-DB.csv'
 
-#database_dir = '/Volumes/Matt-Data/Dropbox/LDPM-DJ/DATA/'
-#database_fn = 'DB.csv'
 
-#database_dir = '/Users/matthew/Box/BSC-Shifa Data files/'
-
-database_dir = '/users/matthew/Dropbox/VT_Mechanisms/'
-database_fn = 'mech_2_monica.csv'
-#database_fn = 'Tilt Test Data.csv'
 
 MODE = 'normal'
 
@@ -39,8 +32,8 @@ MODE = 'normal'
 
 db = pd.read_csv(os.path.join(database_dir, database_fn))
 
-#db = db[db['Patient'] == 'UP PT2']
-#db = db[db['Experiment'] == 'exp6']
+db = db[db['Patient'] == '8011']
+db = db[db['Experiment'] == 'exp6']
 
 patients = db['Patient']
 experiments = db['Experiment']

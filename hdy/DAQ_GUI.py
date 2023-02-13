@@ -1,13 +1,11 @@
 import os
-import sys
-
-import numpy as np
 
 from PySide6 import QtGui, QtCore, QtWidgets
 
 import pyqtgraph as pg
 
-import hdy
+from .DAQ_File import DAQ_File
+
 
 class DAQ_GUI(QtWidgets.QMainWindow):
 
@@ -24,7 +22,7 @@ class DAQ_GUI(QtWidgets.QMainWindow):
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
 
-        openFile = QtWidgets.QAction(QtGui.QIcon('open.png'), 'Open', self)
+        openFile = QtGui.QAction(QtGui.QIcon('open.png'), 'Open', self)
         openFile.setShortcut('Ctrl+O')
         openFile.setStatusTip('Open new File')
         openFile.triggered.connect(self.showFileOpen)
@@ -45,7 +43,7 @@ class DAQ_GUI(QtWidgets.QMainWindow):
 
         if True:
             daq_exp_dir, daq_exp_fn = os.path.split(daq_exp_fl[0])
-            daq_exp = hdy.DAQ_File(daq_exp_dir, daq_exp_fn, search_for_files=False)
+            daq_exp = DAQ_File(daq_exp_dir, daq_exp_fn, search_for_files=False)
             self.daq_exp_widget = DAQ_Exp_Widget(daq_exp)
             self.setCentralWidget(self.daq_exp_widget)
         #except Exception as e:
@@ -71,6 +69,7 @@ class DAQ_Exp_Widget(QtWidgets.QWidget):
         self.control_layout = QtWidgets.QVBoxLayout()
 
         self.pos_lbl = QtWidgets.QLabel()
+        self.zipfl_lbl = QtWidgets.QLabel()
 
         self.matt_lbl = QtWidgets.QLabel()
         self.matt_lbl.setText("Dr. Matthew Shun-Shin\nBHF Clinical Fellow\nImperial College London")
@@ -137,6 +136,8 @@ class DAQ_Exp_Widget(QtWidgets.QWidget):
         self.main_layout = QtWidgets.QHBoxLayout()
         self.main_layout.addLayout(self.control_layout)
         self.main_layout.addLayout(self.layout)
+        self.layout.addWidget(self.zipfl_lbl)
+        self.zipfl_lbl.setText(str(self.daq_exp.zip_fl))
 
         self.setLayout(self.main_layout)
 
@@ -166,5 +167,3 @@ class DAQ_Exp_Widget(QtWidgets.QWidget):
                 self.pos_lbl.setText("X: {pos}".format(pos=int(mousePoint.x())))
             self.vLine.setPos(mousePoint.x())
             self.hLine.setPos(mousePoint.y())
-
-

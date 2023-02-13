@@ -1,7 +1,8 @@
+#Laser Classes for AAD
 import os
 import sys
-import logging
 import collections
+
 import numpy as np
 import pandas as pd
 
@@ -22,11 +23,6 @@ import mmt
 from . import *
 
 PR_DELAY = 120
-
-from collections import namedtuple
-MagicResults = namedtuple('MagicResults',
-                          ['max_idx', 'min_idx', 'magic_data_all', 'magic_data', 'magic_value', 'conf_value'])
-
 
 class BSplineFeatures(sklearn.base.TransformerMixin):
     def __init__(self, knots, degree=3, periodic=False):
@@ -51,7 +47,7 @@ class BSplineFeatures(sklearn.base.TransformerMixin):
         y_dummy = np.zeros(nknots)
 
         knots, coeffs, degree = scipy.interpolate.splrep(knots, y_dummy, k=degree,
-                                          per=periodic)
+                                                         per=periodic)
         ncoeffs = len(coeffs)
         bsplines = []
         for ispline in range(nknots):
@@ -59,7 +55,7 @@ class BSplineFeatures(sklearn.base.TransformerMixin):
             bsplines.append((knots, coeffs, degree))
         return bsplines
 
-class LaserAnalysis(object):
+class LaserAnalysis1(object):
 
     def __init__(self, database_dir=None, database_fn=None, patient=None, exp=None, zip_fl=None, mode="normal"):
 
@@ -107,21 +103,22 @@ class LaserAnalysis(object):
         pressure_source = str(getattr(self.hints, 'BP', 'blank'))
         laser1_source = str(getattr(self.hints, 'Laser1', 'blank'))
         laser2_source = str(getattr(self.hints, 'Laser2', 'blank'))
-        cranial1_source = str(getattr(self.hints, 'TCD1', 'blank'))
-        cranial2_source = str(getattr(self.hints, 'TCD2', 'blank'))
-        #distalBP_source = str(getattr(self.hints, 'BPDistal', 'blank'))
-        resp_source = str(getattr(self.hints, 'resp', 'blank'))
-        boxa_source = str(getattr(self.hints, 'boxa', 'blank'))
+        ecg3_source = str(getattr(self.hints, 'ECG3', 'blank'))
+        rvshock_source = str(getattr(self.hints, 'RVshock', 'blank'))
+        rvbip_source = str(getattr(self.hints, 'Rvbip', 'blank'))
+        lvlead_source = str(getattr(self.hints, 'LVlead', 'blank'))
+        ralead_source = str(getattr(self.hints, 'RAlead', 'blank'))
+
 
         self.ecg = DAQContainerECG(data = getattr(daq_raw, ecg_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
         self.pressure = DAQContainerBP(data = getattr(daq_raw, pressure_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
         self.laser1 = DAQContainerLaser(data = getattr(daq_raw, laser1_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
         self.laser2 = DAQContainerLaser(data = getattr(daq_raw, laser2_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
-        self.cranial1 = DAQContainerLaser(data = getattr(daq_raw, cranial1_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
-        self.cranial2 = DAQContainerLaser(data = getattr(daq_raw, cranial2_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
-       # self.distalBP = DAQContainerBP(data=getattr(daq_raw, distalBP_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
-        self.resp = DAQSignal(data = getattr(daq_raw, resp_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
-        self.boxa = DAQContainerBoxA(data = getattr(daq_raw, boxa_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
+        self.ecg3 = DAQContainerECG(data = getattr(daq_raw, ecg3_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
+        self.rvshock = DAQContainerECG(data = getattr(daq_raw, rvshock_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
+        self.rvbip = DAQContainerECG(data=getattr(daq_raw, rvbip_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
+        self.lvlead = DAQContainerECG(data = getattr(daq_raw, lvlead_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
+        self.ralead = DAQContainerECG(data = getattr(daq_raw, ralead_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
 
 
     def __getitem__(self, key):
@@ -143,16 +140,15 @@ class LaserAnalysis(object):
 
         try:
             self.pressure.calc_peaks(begin=begin, end=end)
-           # self.distalBP.calc_peaks(begin=begin, end=end)
+       #     self.ecg3.calc_peaks(begin=begin, end=end)
+       #     self.rvshock.calc_peaks(begin=begin, end=end)
+       #     self.rvbip.calc_peaks(begin=begin, end=end)
+       #     self.lvlead.calc_peaks(begin=begin, end=end)
+       #     self.ralead.calc_peaks(begin=begin, end=end)
+
 
         except Exception as e:
             print(e)
-
-       # try:
-       #     self.distalBP.calc_peaks(begin=begin, end=end)
-
-       # except Exception as e:
-       #     print(e)
 
         if True:
             self.calc_fft_results(begin=begin, end=end)
@@ -173,11 +169,12 @@ class LaserAnalysis(object):
         self.results['SBP_Mean'] = np.mean(self.pressure.peaks_value)
         self.results['Laser1_SJM'] = np.mean(envelope1_data)
         self.results['Laser2_SJM'] = np.mean(envelope2_data)
-        self.results['Median_RR'] = int(np.median(np.diff(self.ecg.peaks_sample)))
-        self.results['TCD1_mean'] = np.mean(self.cranial1.data[begin:end])
-       # self.results['dMAP_Mean'] = np.mean(self.distalBP.data[begin:end])
-       # self.results['dSBP_Mean'] = np.mean(self.distalBP.peaks_value)
-
+        self.results['Median_RR (bip)'] = int(np.median(np.diff(self.ecg.peaks_sample)))
+       # self.results['Median_RR (3)'] = int(np.median(np.diff(self.ecg3.peaks_sample)))
+       # self.results['Median_VV (RV Shock)'] = int(np.median(np.diff(self.rvshock.peaks_sample)))
+       # self.results['Median_VV (RV bip)'] = int(np.median(np.diff(self.rvbip.peaks_sample)))
+       # self.results['Median_VV (LV)'] = int(np.median(np.diff(self.lvlead.peaks_sample)))
+       # self.results['Median_AA (RA)'] = int(np.median(np.diff(self.ralead.peaks_sample)))
 
         for i, sbp in enumerate(self.pressure.peaks_value):
             self.results_beatbybeat['Patient'].append(self.patient)
@@ -204,24 +201,28 @@ class LaserAnalysis(object):
         self.results_beatbybeat['Notes'] = []
         self.results_beatbybeat['Beat'] = []
         self.results_beatbybeat["SBP"] = []
-       # self.results_beatbybeat["CBF"] = []
-       # self.results_beatbybeat["Laser1_Magic"] = []
 
 
     def calc_fft_results(self, begin=None, end=None):
         results = self.results
 
         self.ecg.calc_fft(begin=begin, end=end, log=False, detrend=True)
+        self.ecg3.calc_fft(begin=begin, end=end, log=False, detrend=True)
+        self.rvshock.calc_fft(begin=begin, end=end, log=False, detrend=True)
+        self.rvbip.calc_fft(begin=begin, end=end, log=False, detrend=True)
+        self.ralead.calc_fft(begin=begin, end=end, log=False, detrend=True)
+        self.lvlead.calc_fft(begin=begin, end=end, log=False, detrend=True)
         self.pressure.calc_fft(begin=begin, end=end, log=True, detrend=True)
-       # self.distalBP.calc_fft(begin=begin, end=end, log=True, detrend=True)
-        self.cranial1.calc_fft(begin=begin, end=end, log=True, detrend=True)
         self.laser1.calc_fft(begin=begin, end=end, log=True, detrend=True)
         self.laser2.calc_fft(begin=begin, end=end, log=True, detrend=True)
 
         ecg_fft = self.ecg.FFT
         pressure_fft = self.pressure.FFT
-      #  distalBP_fft = self.distalBP.FFT
-        cbf_fft = self.cranial1.FFT
+        ecg3_fft = self.ecg3.FFT
+        rvshock_fft = self.rvshock.FFT
+        rvbip_fft = self.rvbip.FFT
+        lvlead_fft = self.lvlead.FFT
+        ralead_fft = self.ralead.FFT
         laser1_fft = self.laser1.FFT
         laser2_fft = self.laser2.FFT
 
@@ -239,15 +240,21 @@ class LaserAnalysis(object):
 
         results['ECG_Peak_Power'] = ecg_fft.power_rpt[ecg_fft_peak_freq_idx]
         results['Fino_Peak_Power'] = pressure_fft.power_rpt[ecg_fft_peak_freq_idx]
-      #  results['DistalBP_Peak_Power'] = distalBP_fft.power_rpt[ecg_fft_peak_freq_idx]
-      #  results['CBF_Peak_Power'] = cbf_fft.power_rpt[ecg_fft_peak_freq_idx]
+      #  results['ECG3_Peak_Power'] = ecg3_fft.power_rpt[ecg_fft_peak_freq_idx]
+      #  results['RVshock_Peak_Power'] = rvshock_fft.power_rpt[ecg_fft_peak_freq_idx]
+      #  results['RVbip_Peak_Power'] = rvbip_fft.power_rpt[ecg_fft_peak_freq_idx]
+      #  results['LV_Peak_Power'] = lvlead_fft.power_rpt[ecg_fft_peak_freq_idx]
+      #  results['RA_Peak_Power'] = ralead_fft.power_rpt[ecg_fft_peak_freq_idx]
         results['Laser1_Peak_Power'] = laser1_fft.power_rpt[ecg_fft_peak_freq_idx]
         results['Laser2_Peak_Power'] = laser2_fft.power_rpt[ecg_fft_peak_freq_idx]
 
         results['ECG_Power'] = np.sum(ecg_fft.power_rpt[ecg_fft_peak_freq_idx-1:ecg_fft_peak_freq_idx+2])
+     #   results['ECG3_Power'] = np.sum(ecg3_fft.power_rpt[ecg_fft_peak_freq_idx-1:ecg_fft_peak_freq_idx+2])
+     #   results['RVshock_Power'] = np.sum(rvshock_fft.power_rpt[ecg_fft_peak_freq_idx-1:ecg_fft_peak_freq_idx+2])
+     #   results['RVbip_Power'] = np.sum(rvbip_fft.power_rpt[ecg_fft_peak_freq_idx-1:ecg_fft_peak_freq_idx+2])
+     #   results['LV_Power'] = np.sum(lvlead_fft.power_rpt[ecg_fft_peak_freq_idx-1:ecg_fft_peak_freq_idx+2])
+     #   results['RA_Power'] = np.sum(ralead_fft.power_rpt[ecg_fft_peak_freq_idx-1:ecg_fft_peak_freq_idx+2])
         results['Fino_Power'] = np.sum(pressure_fft.power_rpt[ecg_fft_peak_freq_idx-1:ecg_fft_peak_freq_idx+2])
-      #  results['DistalBP_Power'] = np.sum(distalBP_fft.power_rpt[ecg_fft_peak_freq_idx-1:ecg_fft_peak_freq_idx+2])
-      #  results['CBF_Power'] = np.sum(cbf_fft.power_rpt[ecg_fft_peak_freq_idx-1:ecg_fft_peak_freq_idx+2])
         results['Laser1_Power'] = np.sum(laser1_fft.power_rpt[ecg_fft_peak_freq_idx-1:ecg_fft_peak_freq_idx+2])
         results['Laser2_Power'] = np.sum(laser2_fft.power_rpt[ecg_fft_peak_freq_idx-1:ecg_fft_peak_freq_idx+2])
 
@@ -293,6 +300,7 @@ class LaserAnalysis(object):
 
                 out = []
                 ecg_peaks_sample = list(ecg_peaks_sample_raw)
+
                 if test_ignore_first:
                     ecg_peaks_sample.pop(0)
                 first = ecg_peaks_sample.pop(0)
@@ -312,7 +320,7 @@ class LaserAnalysis(object):
 
                 test_ecg = np.array(out)
                 test_ecg_peaks_sample.append(test_ecg)
-                result = LaserAnalysis._calc_laser_magic(test_ecg, laser_data)
+                result = LaserAnalysis1._calc_laser_magic(test_ecg, laser_data)
                 if result.conf_value < 25:
                     results_magic[i] = -100
                 else:
@@ -322,7 +330,7 @@ class LaserAnalysis(object):
             max_idx = np.nanargmax(results_magic)
             ecg_peaks_sample = test_ecg_peaks_sample[max_idx]
 
-        result = LaserAnalysis._calc_laser_magic(ecg_peaks_sample, laser_data)
+        result = LaserAnalysis1._calc_laser_magic(ecg_peaks_sample, laser_data)
 
         self[laser + '_min_idx'] = result.min_idx
         self[laser + '_min_idx'] = result.max_idx
@@ -335,8 +343,7 @@ class LaserAnalysis(object):
     def _calc_laser_magic(ecg_peaks_sample, laser_data):
         logging.info(f"ecg_peaks: {ecg_peaks_sample}")
 
-
-        mean_RR = int(4*(np.mean(np.diff(ecg_peaks_sample))//4))
+        mean_RR = int(4 * (np.mean(np.diff(ecg_peaks_sample)) // 4))
         median_RR = int(np.median(np.diff(ecg_peaks_sample)))
         median_hr = 60_000 / median_RR
 
@@ -344,26 +351,27 @@ class LaserAnalysis(object):
         logging.info(f"Median {median_RR} RR")
 
         laser_data = laser_data + 10
-        laser_data = np.log(laser_data) + laser_data/200
-        #LD: hash out next three lines, unhash the last 2 laser_data (LPM_Run)
+        laser_data = np.log(laser_data) + laser_data / 200
+        # LD: hash out next three lines, unhash the last 2 laser_data (LPM_Run)
 
-        b, a = scipy.signal.iirnotch(median_hr/60, 5, 1000)
+        b, a = scipy.signal.iirnotch(median_hr / 60, 5, 1000)
         temp = scipy.signal.filtfilt(b, a, laser_data)
         laser_data = laser_data - temp
 
+        # sos = scipy.signal.butter(5, (0.7, 2.3), 'bandpass', fs=1000, output='sos')
+        # laser_data = scipy.signal.sosfiltfilt(sos, laser_data)
 
-        #sos = scipy.signal.butter(5, (0.7, 2.3), 'bandpass', fs=1000, output='sos')
-        #laser_data = scipy.signal.sosfiltfilt(sos, laser_data)
-
-        #laser_data = mmt.butter_bandpass_filter(laser_data, 0.5, 25.0, 1000, order=2)
+        # laser_data = mmt.butter_bandpass_filter(laser_data, 0.5, 25.0, 1000, order=2)
         ##laser_data = scipy.signal.savgol_filter(laser_data, 11, 3)
 
         try:
             if True:
-                laser_peaks = mmt.find_peaks.find_peaks_cwt_refined(-laser_data, np.array([20,50,100,150,200,300,500]), decimate=True, decimate_factor=10)
+                laser_peaks = mmt.find_peaks.find_peaks_cwt_refined(-laser_data,
+                                                                    np.array([20, 50, 100, 150, 200, 300, 500]),
+                                                                    decimate=True, decimate_factor=10)
 
                 outer_delay = np.subtract.outer(ecg_peaks_sample, laser_peaks)
-                outer_delay[outer_delay>=0] = -100_000
+                outer_delay[outer_delay >= 0] = -100_000
 
                 outer_delay_max = np.max(outer_delay, axis=1)
 
@@ -390,10 +398,10 @@ class LaserAnalysis(object):
 
             peaks_num = ecg_peaks_sample.shape[0]
 
-            for i in np.arange(peaks_num-1):
+            for i in np.arange(peaks_num - 1):
                 logging.info(f"Included beat {i}")
                 beat_begin = ecg_peaks_sample[i] + pre_shift
-                beat_end = ecg_peaks_sample[i+1] + post_shift
+                beat_end = ecg_peaks_sample[i + 1] + post_shift
 
                 if beat_end > len(laser_data):
                     logging.info(f"Not enough laser data after shifting")
@@ -415,8 +423,7 @@ class LaserAnalysis(object):
                 laser_temp_thousand = scipy.signal.detrend(laser_temp_thousand, type='constant')
                 laser_sum = laser_sum + laser_temp_thousand
                 laser_list.append(laser_temp_thousand)
-                inc_peaks = inc_peaks+1
-
+                inc_peaks = inc_peaks + 1
 
             laser_ar = np.array(laser_list)
 
@@ -427,17 +434,17 @@ class LaserAnalysis(object):
             y_fit = laser_ar.T.ravel()
 
             model = make_pipeline(bspline_features, HuberRegressor())
-            model.fit(x_fit[:,None], y_fit)
+            model.fit(x_fit[:, None], y_fit)
 
-            x_predict = np.arange(0,1000)
-            y_predict = model.predict(x_predict[:,None])
+            x_predict = np.arange(0, 1000)
+            y_predict = model.predict(x_predict[:, None])
 
             laser_magic = y_predict
 
             y_predict_all = model.predict(x_fit[:, None])
             conf_pct = r2_score(y_fit, y_predict_all) * 100
 
-            if laser_ar.shape[0] <3:
+            if laser_ar.shape[0] < 3:
                 conf_pct = -1
 
             laser_max_idx = np.argmax(laser_magic)
@@ -446,25 +453,25 @@ class LaserAnalysis(object):
             laser_ptp = laser_magic[laser_max_idx] - laser_magic[laser_min_idx]
 
             laser_magic_value = 100 * (np.exp((laser_ptp) / 2) - 1)
-            #laser_magic_value = np.exp(laser_ptp)
+            # laser_magic_value = np.exp(laser_ptp)
 
             from collections import namedtuple
 
             print(f"Laser Value{laser_ptp}, Laser Conf{conf_pct}")
 
-            out = MagicResults(max_idx = laser_max_idx,
-                               min_idx = laser_min_idx,
-                               magic_data_all = laser_ar,
-                               magic_data = laser_magic,
-                               magic_value = laser_magic_value,
-                               conf_value = conf_pct)
+            out = MagicResults(max_idx=laser_max_idx,
+                               min_idx=laser_min_idx,
+                               magic_data_all=laser_ar,
+                               magic_data=laser_magic,
+                               magic_value=laser_magic_value,
+                               conf_value=conf_pct)
         except Exception:
             logging.exception(f"Problem in calc_laser_magic")
-            out = MagicResults(max_idx = None,
-                               min_idx = None,
-                               magic_data_all = None,
-                               magic_data = None,
-                               magic_value = None,
-                               conf_value = None)
+            out = MagicResults(max_idx=None,
+                               min_idx=None,
+                               magic_data_all=None,
+                               magic_data=None,
+                               magic_value=None,
+                               conf_value=None)
 
         return out

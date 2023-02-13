@@ -1,14 +1,14 @@
 import sys
 import os
-os.environ['PYQTGRAPH_QT_LIB'] = 'PyQt5'
+import logging
 
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
 
 import hdy
 
 
 def main():
-
+    logging.basicConfig(level=logging.INFO)
     app = QtWidgets.QApplication(sys.argv)
 
     selector = hdy.Opt_Selector_GUI()
@@ -21,7 +21,7 @@ def main():
     opt_collection = hdy.OptCollection(source=selector.source, source_hints=selector.source_hints)
     opt_gui = hdy.Opt_GUI(opt_collection)
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == '__main__':

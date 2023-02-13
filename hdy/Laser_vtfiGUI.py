@@ -1,6 +1,4 @@
 import os
-os.environ['PYQTGRAPH_QT_LIB'] = 'PySide6'
-
 import datetime
 
 import numpy as np
@@ -13,7 +11,7 @@ import scipy.interpolate
 import mmt
 
 from . import *
-from PySide6 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 import pyqtgraph as pg
 
@@ -76,7 +74,7 @@ class MagiQuantLaser(QtWidgets.QMainWindow):
         self.mattcon_widget.file_selector.load_dir(file_dir)
 
 
-class LaserGui(QtWidgets.QWidget):
+class LaservtfiGui(QtWidgets.QWidget):
 
     def __init__(self, laser_exp: object, parent: object = None) -> object:
 
@@ -121,8 +119,8 @@ class LaserGui(QtWidgets.QWidget):
     #    self.cranial2_toggle = QtWidgets.QCheckBox("View TCD")
     #    self.cranial2_toggle.stateChanged.connect(self.cranial2_toggle_changed)
 
-      #  self.distalBP_toggle = QtWidgets.QCheckBox("View Distal Coro BP")
-      #  self.distalBP_toggle.stateChanged.connect(self.bp_distal_toggle_changed)
+        self.distalBP_toggle = QtWidgets.QCheckBox("View Distal Coro BP")
+        self.distalBP_toggle.stateChanged.connect(self.bp_distal_toggle_changed)
 
     #    self.resp_toggle = QtWidgets.QCheckBox("View Resp")
     #    self.resp_toggle.stateChanged.connect(self.resp_toggle_changed)
@@ -168,8 +166,8 @@ class LaserGui(QtWidgets.QWidget):
         self.hr_value = QtWidgets.QLabel()
         self.sbp_value = QtWidgets.QLabel()
         self.map_value = QtWidgets.QLabel()
-        #self.distsbp_value = QtWidgets.QLabel()
-        #self.distmap_value = QtWidgets.QLabel()
+        self.distsbp_value = QtWidgets.QLabel()
+        self.distmap_value = QtWidgets.QLabel()
         self.cf_value = QtWidgets.QLabel()
         self.matt_lbl = QtWidgets.QLabel()
         self.shock_status_lbl = QtWidgets.QLabel() #Ale
@@ -178,8 +176,8 @@ class LaserGui(QtWidgets.QWidget):
         self.btn_layout.addWidget(self.laser1_toggle)
         self.btn_layout.addWidget(self.laser2_toggle)
         self.btn_layout.addWidget(self.cranial1_toggle)
-       # self.btn_layout.addWidget(self.distalBP_toggle)
-       # self.btn_layout.addWidget(self.cranial2_toggle)
+        self.btn_layout.addWidget(self.distalBP_toggle)
+        self.btn_layout.addWidget(self.cranial2_toggle)
        # self.btn_layout.addWidget(self.resp_toggle)
        # self.btn_layout.addWidget(self.boxa_toggle)
         self.btn_layout.addWidget(self.hrv_toggle)
@@ -196,8 +194,8 @@ class LaserGui(QtWidgets.QWidget):
         self.btn_layout.addWidget(self.hr_value)
         self.btn_layout.addWidget(self.sbp_value)
         self.btn_layout.addWidget(self.map_value)
-        #self.btn_layout.addWidget(self.distsbp_value)
-        #self.btn_layout.addWidget(self.distmap_value)
+        self.btn_layout.addWidget(self.distsbp_value)
+        self.btn_layout.addWidget(self.distmap_value)
         self.btn_layout.addWidget(self.cf_value)
         self.btn_layout.addWidget(self.shock_status_lbl)#Ale
         self.shockbtn_layout.addWidget(self.shock_btn)#Ale
@@ -242,10 +240,10 @@ class LaserGui(QtWidgets.QWidget):
     #    self.cranial2_pi.setLabel(axis='left',text="Distal Pressure")
     #    self.cranial2_plt = self.cranial2_pi.plot()
 
-       # self.distalBP_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
-       # self.distalBP_pi = self.distalBP_pw.getPlotItem()
-       # self.distalBP_pi.setLabel(axis='left',text="Distal Pressure")
-       # self.distalBP_plt = self.distalBP_pi.plot()
+        self.distalBP_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
+        self.distalBP_pi = self.distalBP_pw.getPlotItem()
+        self.distalBP_pi.setLabel(axis='left',text="Distal Pressure")
+        self.distalBP_plt = self.distalBP_pi.plot()
 
     #    self.resp_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
     #    self.resp_pi = self.resp_pw.getPlotItem()
@@ -272,7 +270,7 @@ class LaserGui(QtWidgets.QWidget):
     #
 
 
-     #   self.plot_layout.addWidget(self.distalBP_pw, stretch=1)
+        self.plot_layout.addWidget(self.distalBP_pw, stretch=1)
     #    self.plot_layout.addWidget(self.cranial2_pw, stretch=1)
     #    self.plot_layout.addWidget(self.resp_pw, stretch=1)
     #    self.plot_layout.addWidget(self.boxa_pw, stretch=1)
@@ -298,7 +296,7 @@ class LaserGui(QtWidgets.QWidget):
         self.laser1_toggle.setChecked(True)
         self.laser2_toggle.setChecked(True)
         self.cranial1_toggle.setChecked(True)
-    #    self.distalBP_toggle.setChecked(True)
+        self.distalBP_toggle.setChecked(True)
     #  self.cranial2_toggle.setChecked(True)
       #  self.resp_toggle.setChecked(True)
     #    self.resp_toggle.setChecked(False)
@@ -323,7 +321,7 @@ class LaserGui(QtWidgets.QWidget):
         self.laser1_pw.sigRangeChanged.connect(self.overview_region_update)
         self.laser2_pw.sigRangeChanged.connect(self.overview_region_update)
         self.cranial1_pw.sigRangeChanged.connect(self.overview_region_update)
-     #   self.distalBP_pw.sigRangeChanged.connect(self.overview_region_update)
+        self.distalBP_pw.sigRangeChanged.connect(self.overview_region_update)
      #   self.cranial2_pw.sigRangeChanged.connect(self.overview_region_update)
      #   self.resp_pw.sigRangeChanged.connect(self.overview_region_update)
       #  self.boxa_pw.sigRangeChanged.connect(self.overview_region_update)
@@ -334,7 +332,7 @@ class LaserGui(QtWidgets.QWidget):
         self.laser1_pi.getAxis('left').setWidth(w=50)
         self.laser2_pi.getAxis('left').setWidth(w=50)
         self.cranial1_pi.getAxis('left').setWidth(w=50)
-     #   self.distalBP_pi.getAxis('left').setWidth(w=50)
+        self.distalBP_pi.getAxis('left').setWidth(w=50)
     #    self.cranial2_pi.getAxis('left').setWidth(w=50)
     #    self.resp_pi.getAxis('left').setWidth(w=50)
     #    self.resp_pi.getAxis('left').setStyle(showValues=False)
@@ -350,7 +348,7 @@ class LaserGui(QtWidgets.QWidget):
         self.pressure_plt.setData(x=np.arange(samples), y=self.laser_exp.pressure.data, pen='#fc0303', antialise=True, autoDownsample=True, clipToView=True)
         self.cranial1_plt.setData(x=np.arange(samples), y=self.laser_exp.cranial1.data, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
       #  self.cranial2_plt.setData(x=np.arange(samples), y=self.laser_exp.cranial2.data, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
-      #  self.distalBP_plt.setData(x=np.arange(samples), y=self.laser_exp.distalBP.data, pen='#fc0303', antialise=True, autoDownsample=True, clipToView=True)
+        self.distalBP_plt.setData(x=np.arange(samples), y=self.laser_exp.distalBP.data, pen='#fc0303', antialise=True, autoDownsample=True, clipToView=True)
       #  self.resp_plt.setData(x=np.arange(samples), y=self.laser_exp.resp.data, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
       #  self.boxa_plt.setData(x=np.arange(samples), y=self.laser_exp.daq_raw.blank, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
 
@@ -425,7 +423,7 @@ class LaserGui(QtWidgets.QWidget):
         self.laser2_pw.plotItem.setXRange(minX, maxX, padding=0)
         self.cranial1_pw.plotItem.setXRange(minX, maxX, padding=0)
      #   self.cranial2_pw.plotItem.setXRange(minX, maxX, padding=0)
-     #   self.distalBP_pw.plotItem.setXRange(minX, maxX, padding=0)
+        self.distalBP_pw.plotItem.setXRange(minX, maxX, padding=0)
      #   self.resp_pw.plotItem.setXRange(minX, maxX, padding=0)
      #   self.boxa_pw.plotItem.setXRange(minX, maxX, padding=0)
 
@@ -457,11 +455,11 @@ class LaserGui(QtWidgets.QWidget):
  #       else:
  #           self.cranial2_pw.hide()
 
- #   def bp_distal_toggle_changed(self, state):
- #       if state == QtCore.Qt.Checked:
- #           self.distalBP_pw.show()
- #       else:
- #           self.distalBP_pw.hide()
+    def bp_distal_toggle_changed(self, state):
+        if state == QtCore.Qt.Checked:
+            self.distalBP_pw.show()
+        else:
+            self.distalBP_pw.hide()
 
   #  def resp_toggle_changed(self, state):
   #      if state == QtCore.Qt.Checked:
@@ -503,7 +501,7 @@ class LaserGui(QtWidgets.QWidget):
             self.laser2_pw.setBackground("w")
             self.cranial1_pw.setBackground("w")
         #    self.cranial2_pw.setBackground("w")
-         #   self.distalBP_pw.setBackground("w")
+            self.distalBP_pw.setBackground("w")
             self.overview_pw.setBackground("w")
         #    self.resp_pw.setBackground("w")
         #    self.boxa_pw.setBackground("w")
@@ -516,7 +514,7 @@ class LaserGui(QtWidgets.QWidget):
             self.laser2_pw.setBackground("k")
             self.cranial1_pw.setBackground("k")
           #  self.cranial2_pw.setBackground("k")
-           # self.distalBP_pw.setBackground("k")
+            self.distalBP_pw.setBackground("k")
             self.overview_pw.setBackground("k")
           #  self.resp_pw.setBackground("k")
           #  self.boxa_pw.setBackground("k")
@@ -535,27 +533,8 @@ class LaserGui(QtWidgets.QWidget):
             print("Problem in calculation")
             print(e)
         else:
-            laser1_magic = self.laser_exp.results['Laser1_Magic']
-            if not laser1_magic:
-                laser1_magic = float("NaN")
-
-            laser2_magic = self.laser_exp.results['Laser2_Magic']
-            if not laser2_magic:
-                laser2_magic = float("NaN")
-
-            laser1_conf = self.laser_exp.results['Laser1_Conf']
-            if not laser1_conf:
-                laser1_conf = float("NaN")
-
-            laser2_conf = self.laser_exp.results['Laser2_Conf']
-            if not laser2_conf:
-                laser2_conf = float("NaN")
-
-            laser1_text = f"Laser1: {laser1_magic:.3f} conf:{laser1_conf:.3f}"
-            laser2_text = f"Laser2: {laser2_magic:.3f} conf:{laser2_conf:.3f}"
-
-            self.laser1_value.setText(laser1_text)
-            self.laser2_value.setText(laser2_text)
+            self.laser1_value.setText("Laser1: " + str(self.laser_exp.results['Laser1_Magic']))
+            self.laser2_value.setText("Laser2: " + str(self.laser_exp.results['Laser2_Magic']))
             self.rr_value.setText("RR: " + str(int(np.mean(np.diff(self.laser_exp.ecg.peaks_sample)))))
             self.hr_value.setText("HR: " + str(int(60000/np.mean(np.diff(self.laser_exp.ecg.peaks_sample)))))
             try:
@@ -569,37 +548,13 @@ class LaserGui(QtWidgets.QWidget):
 
             except Exception as e:
                 print(e)
-            try:
-                laser1_array_ys = 100*((self.laser_exp.laser1_magic_data_all))
-            except:
-                laser1_array_ys = np.zeros((1,1000))
 
-            try:
-                laser1_sum = 100*((self.laser_exp.laser1_magic_data))
-            except:
-                laser1_sum = np.zeros((1000))
 
-            try:
-                laser2_array_ys =100*((self.laser_exp.laser2_magic_data_all))
-            except:
-                laser2_array_ys = np.zeros((1,1000))
-
-            try:
-                laser2_sum =100*((self.laser_exp.laser2_magic_data))
-            except:
-                laser2_sum = np.zeros((1000))
-
-            dual_laser_window = DualLaserWindow(laser1_array_ys=laser1_array_ys,
-                                                laser1_sum=laser1_sum,
-                                                laser2_array_ys=laser2_array_ys,
-                                                laser2_sum=laser2_sum,
+            dual_laser_window = DualLaserWindow(laser1_array_ys=100*(np.exp(self.laser_exp.laser1_magic_data_all)-1),
+                                                laser1_sum=100*(np.exp(self.laser_exp.laser1_magic_data)-1),
+                                                laser2_array_ys=100*(np.exp(self.laser_exp.laser2_magic_data_all)-1),
+                                                laser2_sum=100*(np.exp(self.laser_exp.laser2_magic_data)-1),
                                                 parent=self)
-
-           # dual_laser_window = DualLaserWindow(laser1_array_ys=100*(np.exp(self.laser_exp.laser1_magic_data_all)-1),
-           #                                     laser1_sum=100*(np.exp(self.laser_exp.laser1_magic_data)-1),
-           #                                     laser2_array_ys=100*(np.exp(self.laser_exp.laser2_magic_data_all)-1),
-           #                                     laser2_sum=100*(np.exp(self.laser_exp.laser2_magic_data)-1),
-           #                                     parent=self)
             dual_laser_window.show()
 
     def calc_6s(self):

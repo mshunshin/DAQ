@@ -139,17 +139,28 @@ class OptCollection:
         final_results_db = self.final_results_db
 
         temp1 = final_results_db.groupby(['Patient', 'Period', 'Exp', 'Target', 'Direction', 'Rep', 'Order'])[['SBP']].mean()
+        print("temp1 done")
         temp2 = temp1.unstack().reset_index()
-
+        print(temp2)
+        print("temp2 done")
         temp2['Benefit'] = np.where(temp2['Direction'] == 'AO',
                                     temp2['SBP']['Post'] - temp2['SBP']['Pre'],
                                     temp2['SBP']['Pre'] - temp2['SBP']['Post'])
+        print(temp2)
+        print("temp2a done")
         temp2['Target_num'] = [mmt.str_to_float(x) for x in temp2['Target']]
-
-        temp3 = temp2[temp2['Target_num'] > 0].groupby(['Target_num'])
+        print("temp2b done")
+        temp3 = temp2[temp2['Target_num'] > 0]
+        temp3.columns = temp3.columns.get_level_values(0)
+        temp3 = temp3.groupby(['Target_num'])
+        print(temp3)
+        print("temp3a done")
 
         temp3 = temp3.agg(benefit_mean=('Benefit', 'mean'), benefit_sem=('Benefit', 'sem'),
                           benefit_n=('Benefit', 'count'))
+        print("temp3b done")
+
+        print(temp3)
         print(temp3)
 
         tmp = ['Target_num']
@@ -351,6 +362,7 @@ class OptAnalysis:
             self.pressure_source = self.hints[self.hints['Pressure']]
             self.delay_source = self.hints['BoxA']
 
+
         if source == 'dict':
             #########Provide#####
             self.patient = self.source_hints['patient']
@@ -401,7 +413,7 @@ class OptAnalysis:
             self.ref = self.hints['Ref']
         except Exception as e:
             print(e)
-            self.ref = "140ms"
+            self.ref = "320ms"
             self.ref_idx = self.delay.codebook_default_labels.index(self.ref)
 
         try:

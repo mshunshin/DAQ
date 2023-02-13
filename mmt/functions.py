@@ -1,31 +1,30 @@
+import sys
+import math
 import numpy as np
+import skimage as ski
 import scipy
-import scipy.signal
-
+from scipy import ndimage
+from scipy.interpolate import UnivariateSpline
+from scipy.signal import filtfilt, butter, find_peaks_cwt, argrelextrema
 
 def IQR(x, pct):
-    upper, lower = np.percentile(x, [100-pct, pct])
-    return upper - lower
-
+	upper, lower = np.percentile(x, [100-pct, pct])
+	return upper - lower
 
 def MQR(x, pct1, pct2):
     upper, lower = np.percentile(x, [pct1, pct2])
     return upper-lower
 
-
 def max_max_element(a):
     return max(np.where(a==a.max())[0])
-
 
 def find_nearest_value(array,value):
     idx = (np.abs(array-value)).argmin()
     return (array[idx])
 
-
 def find_nearest_idx(array,value):
     idx = (np.abs(array-value)).argmin()
     return (idx)
-
 
 def find_nearest_above_idx(my_array, target):
     diff = my_array - target
@@ -36,7 +35,6 @@ def find_nearest_above_idx(my_array, target):
         return None # returns None if target is greater than any value
     masked_diff = np.ma.masked_array(diff, mask)
     return masked_diff.argmin()
-
 
 def find_nearest_below_idx(my_array, target):
     diff = my_array - target
@@ -84,13 +82,16 @@ def butter_lowpass_filter(data, cutOff, fs, order=5):
     return y
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
-    sos = scipy.signal.butter(N=order, Wn=[lowcut, highcut], btype='band', output='sos', fs=fs)
-    return sos
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+    b, a = scipy.signal.butter(order, [low, high], btype='band')
+    return b, a
 
 
 def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
-    sos = scipy.signal.butter(N=order, Wn=[lowcut, highcut], btype='band', output='sos', fs=fs)
-    y = scipy.signal.sosfiltfilt(sos=sos, x=data)
+    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+    y = scipy.signal.filtfilt(b, a, data)
     return y
 
 def rolling_window(a, window):

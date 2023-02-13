@@ -58,7 +58,8 @@ class DAQContainerECG(DAQSignal):
     def __init__(self, ecg_hint='sinus', **kwds):
         super().__init__(**kwds)
 
-        self.data = mmt.butter_bandpass_filter(self.data, 0.5, 40, self.sampling_rate, order=5)
+        self.data = mmt.butter_bandpass_filter(self.data, 0.5, 49, self.sampling_rate, order=2)
+
         self.ecg_hint = ecg_hint
 
     def calc_ecg_peaks(self, begin=None, end=None, ecg_hint='sinus'):
@@ -74,7 +75,13 @@ class DAQContainerECG(DAQSignal):
                     end = min(self.data.shape[0], 40000+begin)
 
         data = self.data[begin:end]
-        #data_dec = scipy.signal.decimate(data, 10, zero_phase=True)
+        data_dec = scipy.signal.decimate(data, 10, zero_phase=True)
+
+
+        if ecg_hint.lower() == "vf":
+            print(f'ECG_Hint was vf')
+            relmax_peaks = scipy.signal.argrelmax(data, order=50)[0]
+            peaks_sample = np.array(relmax_peaks)
 
         if ecg_hint.lower() == "vf":
             print(f'ECG_Hint was vf')
@@ -85,22 +92,49 @@ class DAQContainerECG(DAQSignal):
             print(f'ECG_Hint was old-vf')
             ecg_detect = bn.move_sum(np.diff(data_dec) ** 2, 4, 1)
             ecg_detect[ecg_detect < np.max(ecg_detect) // 10] = 0
-            ecg_detect_peaks = np.array(
-                scipy.signal.find_peaks_cwt(ecg_detect, widths=np.linspace(5, 10, 1), noise_perc=10)) * 10
+            ecg_detect_peaks = np.array(scipy.signal.find_peaks_cwt(ecg_detect, widths=np.linspace(5, 10, 1), noise_perc=10)) * 10
             ecg_detect_peaks = ecg_detect_peaks + 75
 
             relmax_peaks = scipy.signal.argrelmax(np.diff(data)**2, order=50)[0]
             final_peaks = []
             for peak in ecg_detect_peaks:
                 final_peaks.append(mmt.find_nearest_value(relmax_peaks, peak))
+
             peaks_sample = np.array(relmax_peaks)
+
 
         else:
             print(f'ECG_Hint was not vf')
+            if True:
+                #ecgdetector = mmt.ecg.had_ecgdet(sampling_frequency = 1000)
+                #ecg_detect_peaks = ecgdetector.Hoai_Anne_ecg_detector(data)
+                #ecg_detect_peaks = mmt.ecg.EGM_detector(data)
+              #  ecgdetector = mmt.ecg.ECGDetectors(1000)
+               # ecg_detect_peaks = ecgdetector.swt_detector(data)
 
-            ecgdetector = mmt.ecg.ECGDetectors(1000)
-            ecg_detect_peaks = ecgdetector.matt_detector(data)
+                #ecg_detect_peaks = ecgdetector.engzee_segmenter(signal=data)
+                ecg_data = data.copy()
+                ecg_data[ecg_data>0] = 0
+                ecg_detect_peaks = mmt.ecg.kathirvel_ecg(ecg_data, 500, ransac_window_size=10, lowfreq=7, highfreq=45)
+            else:
+                ecgdetector = mmt.ecg.ECGDetectors(1000)
+                #ecg_detect_peaks = mmt.ecg.kathirvel_ecg(data, 1000)
+                # Replace swt_detector with HAD code in mmt > ecg detectors > create new function
+                #ecg_detect_peaks = ecgdetector.HAD_ecgdetectors.Hoai_Anne_ecg_detector(data)
+                ecg_detect_peaks = ecgdetector.swt_detector(data)
+               # ecg_detect_peaks = ecgdetector.two_average_detector(data)
+                #ecg_detect_peaks = cd_ecgdet(data)
 
+
+
+            relmax_peaks = scipy.signal.argrelmax(np.abs(data), order=100)[0]
+
+            final_peaks = []
+            for peak in ecg_detect_peaks:
+                peak = int(peak)
+                final_peaks.append(mmt.find_nearest_value(relmax_peaks, peak))
+
+            peaks_sample = np.array(final_peaks)
             peaks_sample = ecg_detect_peaks
 
         print("Finished calculating ECG Peaks")
@@ -322,6 +356,7 @@ class DAQContainerLaser(DAQSignal):
             data[:] = 1
 
         #self.data = data
+
         self.data = scipy.signal.savgol_filter(data, 101, 3)
 
 

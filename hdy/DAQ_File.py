@@ -14,8 +14,7 @@ class DAQ_File():
     def __init__(self, zip_dir, zip_fn, channels = None, search_for_files = False):
 
         if channels is None:
-            channels = ["ecg", "boxa", "boxb", "BP", "bpao", "plethg", "plethi", "plethr", "plethh", "qfin",
-                     "Resp", "pot", "flow", "spO2", "pot", "bp_prox", "bp_dist", "bp", "ld"]
+            channels = ["ecg", "boxa", "boxb", "BP", "bpao", "plethg", "plethi", "plethr", "plethh", "qfin"]
 
         sources = []
 

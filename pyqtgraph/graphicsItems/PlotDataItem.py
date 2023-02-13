@@ -237,6 +237,9 @@ class PlotDataItem(GraphicsObject):
         **Optimization keyword arguments:**
 
             ================= =======================================================================
+            useCache          (bool) By default, generated point graphics items are cached to
+                              improve performance. Setting this to False can improve image quality
+                              in certain situations.
             antialias         (bool) By default, antialiasing is disabled to improve performance.
                               Note that in some cases (in particular, when ``pxMode=True``), points
                               will be rendered antialiased even if this is set to `False`.
@@ -298,9 +301,9 @@ class PlotDataItem(GraphicsObject):
         self.setFlag(self.GraphicsItemFlag.ItemHasNoContents)
         # Original data, mapped data, and data processed for display is now all held in PlotDataset objects.
         # The convention throughout PlotDataItem is that a PlotDataset is only instantiated if valid data is available.
-        self._dataset        = None # will hold a PlotDataset for the original data
+        self._dataset        = None # will hold a PlotDataset for the original data, accessed by getOriginalData()
         self._datasetMapped  = None # will hold a PlotDataset for data after mapping transforms (e.g. log scale)
-        self._datasetDisplay = None # will hold a PlotDataset for data downsampled and limited for display
+        self._datasetDisplay = None # will hold a PlotDataset for data downsampled and limited for display, accessed by getData()
         self.curve = PlotCurveItem()
         self.scatter = ScatterPlotItem()
         self.curve.setParentItem(self)
@@ -348,6 +351,7 @@ class PlotDataItem(GraphicsObject):
             'antialias': getConfigOption('antialias'),
             'pointMode': None,
 
+            'useCache': True,
             'downsample': 1,
             'autoDownsample': False,
             'downsampleMethod': 'peak',
@@ -862,7 +866,8 @@ class PlotDataItem(GraphicsObject):
                 ('symbolSize', 'size'),
                 ('data', 'data'),
                 ('pxMode', 'pxMode'),
-                ('antialias', 'antialias')
+                ('antialias', 'antialias'),
+                ('useCache', 'useCache')
             ]:
                 if k in self.opts:
                     scatterArgs[v] = self.opts[k]
@@ -904,6 +909,14 @@ class PlotDataItem(GraphicsObject):
         else: # ...hide if not.
             self.scatter.hide()
 
+    def getOriginalDataset(self):
+            """
+            Returns the original, unmapped data as the tuple (`xData`, `yData`).
+            """
+            dataset = self._dataset
+            if dataset is None:
+                return (None, None)
+            return dataset.x, dataset.y
 
     def getDisplayDataset(self):
         """
@@ -1065,7 +1078,7 @@ class PlotDataItem(GraphicsObject):
 
     def getData(self):
         """
-        Returns the displayed data as the tuple (`xData`, `yData`) after mapping and data reduction.         
+        Returns the displayed data as the tuple (`xData`, `yData`) after mapping and data reduction.
         """
         dataset = self.getDisplayDataset()
         if dataset is None:

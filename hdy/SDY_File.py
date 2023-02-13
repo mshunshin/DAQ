@@ -85,6 +85,4 @@ class SDY_File:
             self.calc1_raw = frame[:, self.chan_calc1].astype(np.float).mean(axis=1)
             self.calc2_raw = frame[:, self.chan_calc2].astype(np.float).mean(axis=1)
             self.calc3_raw = frame[:, self.chan_calc3].astype(np.float).mean(axis=1)
-            self.spectrum_a = frame[:, 88:344]
-            self.spectrum_b = frame[:, 344:600]
             self.spectrum_raw = (frame[:, 88:344] + frame[:, 344:600]) / 2

@@ -1,6 +1,6 @@
-import os
-os.environ['PYQTGRAPH_QT_LIB'] = 'PySide6'
+#LPM GUI FOR AAD
 
+import os
 import datetime
 
 import numpy as np
@@ -9,11 +9,14 @@ import scipy
 import scipy.signal
 import scipy.fftpack
 import scipy.interpolate
+os.environ['PYQTGRAPH_QT_LIB'] = 'PySide6'
 
 import mmt
 
 from . import *
+import hdy.LaserClasses as lc
 from PySide6 import QtCore, QtWidgets, QtGui
+#from PyQt5 import QtCore, QtWidgets, QtGui
 
 import pyqtgraph as pg
 
@@ -76,13 +79,11 @@ class MagiQuantLaser(QtWidgets.QMainWindow):
         self.mattcon_widget.file_selector.load_dir(file_dir)
 
 
-class LaserGui(QtWidgets.QWidget):
+class ADAGui(QtWidgets.QWidget):
 
     def __init__(self, laser_exp: object, parent: object = None) -> object:
 
         super().__init__(parent=parent)
-
-        self.shock_result = None
 
         self.laser_exp = laser_exp
         self.setup_gui()
@@ -96,13 +97,12 @@ class LaserGui(QtWidgets.QWidget):
 
         pg.setConfigOptions(antialias=True)
 
-        self.setWindowTitle('LDPM Interface')
+        self.setWindowTitle('AAD Research View')
         self.setWindowIcon(QtGui.QIcon('web.png'))
 
         self.plot_layout = QtWidgets.QVBoxLayout()
         self.btn_layout = QtWidgets.QVBoxLayout()
         self.minibtn_layout = QtWidgets.QVBoxLayout()
-        self.shockbtn_layout = QtWidgets.QHBoxLayout()
         self.turnbtn_layout = QtWidgets.QHBoxLayout()
         self.main_layout = QtWidgets.QHBoxLayout()
 
@@ -115,20 +115,20 @@ class LaserGui(QtWidgets.QWidget):
         self.laser2_toggle = QtWidgets.QCheckBox("View Laser2")
         self.laser2_toggle.stateChanged.connect(self.laser2_toggle_changed)
 
-        self.cranial1_toggle = QtWidgets.QCheckBox("View Coro Flow")
-        self.cranial1_toggle.stateChanged.connect(self.cranial1_toggle_changed)
+        self.ecg3_toggle = QtWidgets.QCheckBox("View 3 lead ECG")
+        self.ecg3_toggle.stateChanged.connect(self.ecg3_toggle_changed)
 
-    #    self.cranial2_toggle = QtWidgets.QCheckBox("View TCD")
-    #    self.cranial2_toggle.stateChanged.connect(self.cranial2_toggle_changed)
+        self.rvshock_toggle = QtWidgets.QCheckBox("View RV Shock")
+        self.rvshock_toggle.stateChanged.connect(self.rvshock_toggle_changed)
 
-      #  self.distalBP_toggle = QtWidgets.QCheckBox("View Distal Coro BP")
-      #  self.distalBP_toggle.stateChanged.connect(self.bp_distal_toggle_changed)
+        self.rvbip_toggle = QtWidgets.QCheckBox("View RV Bipolar")
+        self.rvbip_toggle.stateChanged.connect(self.rvbip_toggle_changed)
 
-    #    self.resp_toggle = QtWidgets.QCheckBox("View Resp")
-    #    self.resp_toggle.stateChanged.connect(self.resp_toggle_changed)
+        self.lvlead_toggle = QtWidgets.QCheckBox("View LV Lead")
+        self.lvlead_toggle.stateChanged.connect(self.lvlead_toggle_changed)
 
-    #    self.boxa_toggle = QtWidgets.QCheckBox("View BoxA")
-    #    self.boxa_toggle.stateChanged.connect(self.boxa_toggle_changed)
+        self.ralead_toggle = QtWidgets.QCheckBox("View RA")
+        self.ralead_toggle.stateChanged.connect(self.ralead_toggle_changed)
 
         self.calc_move_btn = QtWidgets.QPushButton("Move Calc ROI")
         self.calc_move_btn.clicked.connect(self.calc_region_move)
@@ -149,39 +149,24 @@ class LaserGui(QtWidgets.QWidget):
         self.laser_combo.addItems("Raw Filtered Log-Filtered".split())
         self.laser_combo.currentIndexChanged.connect(self.update_data)
 
-        self.shock_btn = QtWidgets.QPushButton("Shock")
-        self.shock_btn.setStyleSheet("background-color : red; color: white") #Ale
-        self.shock_btn.clicked.connect(self.shock) #Ale
-        self.shock_counter = 0 #+ self.shock_counter #Ale
-
-        self.noshock_btn = QtWidgets.QPushButton("No Shock") #Ale
-        self.noshock_btn.setStyleSheet("background-color : green; color: white") #Ale
-        self.noshock_btn.clicked.connect(self.noshock) #Ale
-        self.noshock_counter = 0 #+ self.noshock_counter #Ale
-
-
         self.begin_lbl = QtWidgets.QLabel()
         self.end_lbl = QtWidgets.QLabel()
         self.laser1_value = QtWidgets.QLabel()
         self.laser2_value = QtWidgets.QLabel()
-        self.rr_value = QtWidgets.QLabel()
         self.hr_value = QtWidgets.QLabel()
+        self.rr_value = QtWidgets.QLabel()
         self.sbp_value = QtWidgets.QLabel()
         self.map_value = QtWidgets.QLabel()
-        #self.distsbp_value = QtWidgets.QLabel()
-        #self.distmap_value = QtWidgets.QLabel()
-        self.cf_value = QtWidgets.QLabel()
         self.matt_lbl = QtWidgets.QLabel()
-        self.shock_status_lbl = QtWidgets.QLabel() #Ale
 
         self.btn_layout.addWidget(self.bg_toggle)
         self.btn_layout.addWidget(self.laser1_toggle)
         self.btn_layout.addWidget(self.laser2_toggle)
-        self.btn_layout.addWidget(self.cranial1_toggle)
-       # self.btn_layout.addWidget(self.distalBP_toggle)
-       # self.btn_layout.addWidget(self.cranial2_toggle)
-       # self.btn_layout.addWidget(self.resp_toggle)
-       # self.btn_layout.addWidget(self.boxa_toggle)
+        self.btn_layout.addWidget(self.ecg3_toggle)
+        self.btn_layout.addWidget(self.rvshock_toggle)
+        self.btn_layout.addWidget(self.rvbip_toggle)
+        self.btn_layout.addWidget(self.lvlead_toggle)
+        self.btn_layout.addWidget(self.ralead_toggle)
         self.btn_layout.addWidget(self.hrv_toggle)
         self.btn_layout.addWidget(self.laser_combo)
         self.btn_layout.addWidget(self.calc_move_btn)
@@ -196,16 +181,7 @@ class LaserGui(QtWidgets.QWidget):
         self.btn_layout.addWidget(self.hr_value)
         self.btn_layout.addWidget(self.sbp_value)
         self.btn_layout.addWidget(self.map_value)
-        #self.btn_layout.addWidget(self.distsbp_value)
-        #self.btn_layout.addWidget(self.distmap_value)
-        self.btn_layout.addWidget(self.cf_value)
-        self.btn_layout.addWidget(self.shock_status_lbl)#Ale
-        self.shockbtn_layout.addWidget(self.shock_btn)#Ale
-        self.shockbtn_layout.addWidget(self.noshock_btn) #Ale
         self.turnbtn_layout.addWidget(self.matt_lbl)
-        self.shock_status_lbl.setText("")
-       # self.matt_lbl.setAlignment(QtCore.Qt.AlignRight)
-       # self.matt_lbl.setText("Dr. Matthew Shun-Shin\nBHF Clinical Fellow\nImperial College London")
 
         self.ecg_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
         self.ecg_pi = self.ecg_pw.getPlotItem()
@@ -222,40 +198,38 @@ class LaserGui(QtWidgets.QWidget):
         self.laser1_pi = self.laser1_pw.getPlotItem()
         self.laser1_pi.setLabel(axis='left',text="LDPM1")
         self.laser1_plt = self.laser1_pi.plot()
-        self.laser1_peak_plt = self.laser1_pi.plot()
         self.envelope1_plt = self.laser1_pi.plot()
 
         self.laser2_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
         self.laser2_pi = self.laser2_pw.getPlotItem()
         self.laser2_pi.setLabel(axis='left',text="LDPM2")
         self.laser2_plt = self.laser2_pi.plot()
-        self.laser2_peak_plt = self.laser2_pi.plot()
         self.envelope2_plt = self.laser2_pi.plot()
 
-        self.cranial1_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
-        self.cranial1_pi = self.cranial1_pw.getPlotItem()
-        self.cranial1_pi.setLabel(axis='left',text="Coro Flow")
-        self.cranial1_plt = self.cranial1_pi.plot()
+        self.ecg3_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
+        self.ecg3_pi = self.ecg3_pw.getPlotItem()
+        self.ecg3_pi.setLabel(axis='left',text="3-Lead ECG")
+        self.ecg3_plt = self.ecg3_pi.plot()
 
-    #    self.cranial2_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
-    #    self.cranial2_pi = self.cranial2_pw.getPlotItem()
-    #    self.cranial2_pi.setLabel(axis='left',text="Distal Pressure")
-    #    self.cranial2_plt = self.cranial2_pi.plot()
+        self.ralead_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
+        self.ralead_pi = self.ralead_pw.getPlotItem()
+        self.ralead_pi.setLabel(axis='left',text="RA")
+        self.ralead_plt = self.ralead_pi.plot()
 
-       # self.distalBP_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
-       # self.distalBP_pi = self.distalBP_pw.getPlotItem()
-       # self.distalBP_pi.setLabel(axis='left',text="Distal Pressure")
-       # self.distalBP_plt = self.distalBP_pi.plot()
+        self.rvshock_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
+        self.rvshock_pi = self.rvshock_pw.getPlotItem()
+        self.rvshock_pi.setLabel(axis='left',text="RV Shock")
+        self.rvshock_plt = self.rvshock_pi.plot()
 
-    #    self.resp_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
-    #    self.resp_pi = self.resp_pw.getPlotItem()
-    #    self.resp_pi.setLabel(axis='left',text="Resp")
-    #    self.resp_plt = self.resp_pi.plot()
+        self.rvbip_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
+        self.rvbip_pi = self.rvbip_pw.getPlotItem()
+        self.rvbip_pi.setLabel(axis='left',text="RV Bip")
+        self.rvbip_plt = self.rvbip_pi.plot()
 
-    #    self.boxa_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
-    #    self.boxa_pi = self.boxa_pw.getPlotItem()
-    #    self.boxa_pi.setLabel(axis='left',text="BoxA")
-    #    self.boxa_plt = self.boxa_pi.plot()
+        self.lvlead_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
+        self.lvlead_pi = self.lvlead_pw.getPlotItem()
+        self.lvlead_pi.setLabel(axis='left',text="LV")
+        self.lvlead_plt = self.lvlead_pi.plot()
 
         self.overview_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
         self.overview_pi = self.overview_pw.getPlotItem()
@@ -268,14 +242,11 @@ class LaserGui(QtWidgets.QWidget):
         self.plot_layout.addWidget(self.pressure_pw, stretch=1)
         self.plot_layout.addWidget(self.laser1_pw, stretch=1)
         self.plot_layout.addWidget(self.laser2_pw, stretch=1)
-        self.plot_layout.addWidget(self.cranial1_pw, stretch=1)
-    #
-
-
-     #   self.plot_layout.addWidget(self.distalBP_pw, stretch=1)
-    #    self.plot_layout.addWidget(self.cranial2_pw, stretch=1)
-    #    self.plot_layout.addWidget(self.resp_pw, stretch=1)
-    #    self.plot_layout.addWidget(self.boxa_pw, stretch=1)
+        self.plot_layout.addWidget(self.ecg3_pw, stretch=1)
+        self.plot_layout.addWidget(self.rvshock_pw, stretch=1)
+        self.plot_layout.addWidget(self.rvbip_pw, stretch=1)
+        self.plot_layout.addWidget(self.lvlead_pw, stretch=1)
+        self.plot_layout.addWidget(self.ralead_pw, stretch=1)
         self.plot_layout.addWidget(self.overview_pw, stretch=1)
         self.plot_layout.addWidget(self.zipfl_lbl)
         self.zipfl_lbl.setText(str(self.laser_exp.zip_fl))
@@ -285,7 +256,6 @@ class LaserGui(QtWidgets.QWidget):
 
 
         self.minibtn_layout.addLayout(self.turnbtn_layout)
-        self.btn_layout.addLayout(self.shockbtn_layout)
         self.main_layout.addLayout(self.btn_layout)
         self.plot_layout.addLayout(self.minibtn_layout)
         self.main_layout.addLayout(self.plot_layout)
@@ -297,13 +267,11 @@ class LaserGui(QtWidgets.QWidget):
         #self.bg_toggle.setChecked(False)
         self.laser1_toggle.setChecked(True)
         self.laser2_toggle.setChecked(True)
-        self.cranial1_toggle.setChecked(True)
-    #    self.distalBP_toggle.setChecked(True)
-    #  self.cranial2_toggle.setChecked(True)
-      #  self.resp_toggle.setChecked(True)
-    #    self.resp_toggle.setChecked(False)
-    #    self.boxa_toggle.setChecked(False)
-    #    self.boxa_toggle_changed(False)
+        self.ecg3_toggle.setChecked(True)
+        self.rvshock_toggle.setChecked(True)
+        self.rvbip_toggle.setChecked(True)
+        self.lvlead_toggle.setChecked(True)
+        self.ralead_toggle.setChecked(True)
         self.hrv_toggle.setChecked(False)
 
     def setup_plots(self):
@@ -322,23 +290,27 @@ class LaserGui(QtWidgets.QWidget):
         self.pressure_pw.sigRangeChanged.connect(self.overview_region_update)
         self.laser1_pw.sigRangeChanged.connect(self.overview_region_update)
         self.laser2_pw.sigRangeChanged.connect(self.overview_region_update)
-        self.cranial1_pw.sigRangeChanged.connect(self.overview_region_update)
-     #   self.distalBP_pw.sigRangeChanged.connect(self.overview_region_update)
-     #   self.cranial2_pw.sigRangeChanged.connect(self.overview_region_update)
-     #   self.resp_pw.sigRangeChanged.connect(self.overview_region_update)
-      #  self.boxa_pw.sigRangeChanged.connect(self.overview_region_update)
+        self.ecg3_pw.sigRangeChanged.connect(self.overview_region_update)
+        self.rvshock_pw.sigRangeChanged.connect(self.overview_region_update)
+        self.rvbip_pw.sigRangeChanged.connect(self.overview_region_update)
+        self.lvlead_pw.sigRangeChanged.connect(self.overview_region_update)
+        self.ralead_pw.sigRangeChanged.connect(self.overview_region_update)
 
         self.ecg_pi.getAxis('left').setWidth(w=50)
         self.ecg_pi.getAxis('left').setStyle(showValues=False)
         self.pressure_pi.getAxis('left').setWidth(w=50)
         self.laser1_pi.getAxis('left').setWidth(w=50)
         self.laser2_pi.getAxis('left').setWidth(w=50)
-        self.cranial1_pi.getAxis('left').setWidth(w=50)
-     #   self.distalBP_pi.getAxis('left').setWidth(w=50)
-    #    self.cranial2_pi.getAxis('left').setWidth(w=50)
-    #    self.resp_pi.getAxis('left').setWidth(w=50)
-    #    self.resp_pi.getAxis('left').setStyle(showValues=False)
-    #    self.boxa_pi.getAxis('left').setWidth(w=50)
+        self.ecg3_pi.getAxis('left').setWidth(w=50)
+        self.ecg3_pi.getAxis('left').setStyle(showValues=False)
+        self.rvshock_pi.getAxis('left').setWidth(w=50)
+        self.rvshock_pi.getAxis('left').setStyle(showValues=False)
+        self.rvbip_pi.getAxis('left').setWidth(w=50)
+        self.rvbip_pi.getAxis('left').setStyle(showValues=False)
+        self.lvlead_pi.getAxis('left').setWidth(w=50)
+        self.lvlead_pi.getAxis('left').setStyle(showValues=False)
+        self.ralead_pi.getAxis('left').setWidth(w=50)
+        self.ralead_pi.getAxis('left').setStyle(showValues=False)
         self.overview_pi.getAxis('left').setWidth(w=50)
         self.overview_pi.getAxis('left').setStyle(showValues=False)
 
@@ -348,11 +320,12 @@ class LaserGui(QtWidgets.QWidget):
 
         #self.pressure_plt.setData(self.laser_exp.pressure.data, pen='r', antialise=True, autoDownsample=True, clipToView=True)
         self.pressure_plt.setData(x=np.arange(samples), y=self.laser_exp.pressure.data, pen='#fc0303', antialise=True, autoDownsample=True, clipToView=True)
-        self.cranial1_plt.setData(x=np.arange(samples), y=self.laser_exp.cranial1.data, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
-      #  self.cranial2_plt.setData(x=np.arange(samples), y=self.laser_exp.cranial2.data, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
-      #  self.distalBP_plt.setData(x=np.arange(samples), y=self.laser_exp.distalBP.data, pen='#fc0303', antialise=True, autoDownsample=True, clipToView=True)
-      #  self.resp_plt.setData(x=np.arange(samples), y=self.laser_exp.resp.data, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
-      #  self.boxa_plt.setData(x=np.arange(samples), y=self.laser_exp.daq_raw.blank, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
+
+        self.ecg3_plt.setData(x=np.arange(samples), y=self.laser_exp.ecg3.data, pen='#02B83A', antialise=True, autoDownsample=True, clipToView=True)
+        self.rvshock_plt.setData(x=np.arange(samples), y=self.laser_exp.rvshock.data, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
+        self.rvbip_plt.setData(x=np.arange(samples), y=self.laser_exp.rvbip.data, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
+        self.lvlead_plt.setData(x=np.arange(samples), y=self.laser_exp.lvlead.data, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
+        self.ralead_plt.setData(x=np.arange(samples), y=self.laser_exp.ralead.data, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
 
         if self.laser_combo.currentIndex() == 0:
             laser1_data = self.laser_exp.laser1.data
@@ -390,30 +363,13 @@ class LaserGui(QtWidgets.QWidget):
         if not self.hrv_toggle.isChecked():
             print("off")
             self.ecg_peak_plt.setData(x=[], y=[],
-                         pen=None, symbol=None,
-                         antialise=True, autoDownsample=False, downsampleMethod='peak', clipToView=False)
-
-            self.laser1_peak_plt.setData(x=[], y=[],
-                         pen=None, symbol=None,
-                         antialise=True, autoDownsample=False, downsampleMethod='peak', clipToView=False)
-
-            self.laser2_peak_plt.setData(x=[], y=[],
-                         pen=None, symbol=None,
-                         antialise=True, autoDownsample=False, downsampleMethod='peak', clipToView=False)
+                                      pen=None, symbol=None,
+                                      antialise=True, autoDownsample=False, downsampleMethod='peak', clipToView=False)
 
         elif self.hrv_toggle.isChecked():
             self.ecg_peak_plt.setData(x=self.ecg_peaks_x, y=self.ecg_peaks_y,
-                         pen=None, symbol='o', size=4, pxMode=True,
-                         antialise=True, autoDownsample=False, downsampleMethod='peak', clipToView=False)
-
-            self.laser1_peak_plt.setData(x=self.ecg_peaks_x, y=laser1_data[self.ecg_peaks_x],
-                         pen=None, symbol='o', size=4, pxMode=True,
-                         antialise=True, autoDownsample=False, downsampleMethod='peak', clipToView=False)
-
-            self.laser2_peak_plt.setData(x=self.ecg_peaks_x, y=laser2_data[self.ecg_peaks_x],
-                                         pen=None, symbol='o', size=4, pxMode=True,
-                                         antialise=True, autoDownsample=False, downsampleMethod='peak',
-                                         clipToView=False)
+                                      pen=None, symbol='o', size=4, pxMode=True,
+                                      antialise=True, autoDownsample=False, downsampleMethod='peak', clipToView=False)
 
     def overview_region_changed(self):
         self.overview_region.setZValue(10)
@@ -423,11 +379,11 @@ class LaserGui(QtWidgets.QWidget):
         self.pressure_pw.plotItem.setXRange(minX, maxX, padding=0)
         self.laser1_pw.plotItem.setXRange(minX, maxX, padding=0)
         self.laser2_pw.plotItem.setXRange(minX, maxX, padding=0)
-        self.cranial1_pw.plotItem.setXRange(minX, maxX, padding=0)
-     #   self.cranial2_pw.plotItem.setXRange(minX, maxX, padding=0)
-     #   self.distalBP_pw.plotItem.setXRange(minX, maxX, padding=0)
-     #   self.resp_pw.plotItem.setXRange(minX, maxX, padding=0)
-     #   self.boxa_pw.plotItem.setXRange(minX, maxX, padding=0)
+        self.ecg3_pw.plotItem.setXRange(minX, maxX, padding=0)
+        self.rvshock_pw.plotItem.setXRange(minX, maxX, padding=0)
+        self.rvbip_pw.plotItem.setXRange(minX, maxX, padding=0)
+        self.lvlead_pw.plotItem.setXRange(minX, maxX, padding=0)
+        self.ralead_pw.plotItem.setXRange(minX, maxX, padding=0)
 
     def overview_region_update(self, window, viewRange):
         rgn = viewRange[0]
@@ -445,38 +401,35 @@ class LaserGui(QtWidgets.QWidget):
         else:
             self.laser2_pw.hide()
 
-    def cranial1_toggle_changed(self, state):
+    def ecg3_toggle_changed(self, state):
         if state == QtCore.Qt.Checked:
-            self.cranial1_pw.show()
+            self.ecg3_pw.show()
         else:
-            self.cranial1_pw.hide()
+            self.ecg3_pw.hide()
 
- #   def cranial2_toggle_changed(self, state):
- #       if state == QtCore.Qt.Checked:
- #           self.cranial2_pw.show()
- #       else:
- #           self.cranial2_pw.hide()
+    def rvshock_toggle_changed(self, state):
+        if state == QtCore.Qt.Checked:
+            self.rvshock_pw.show()
+        else:
+            self.rvshock_pw.hide()
 
- #   def bp_distal_toggle_changed(self, state):
- #       if state == QtCore.Qt.Checked:
- #           self.distalBP_pw.show()
- #       else:
- #           self.distalBP_pw.hide()
+    def rvbip_toggle_changed(self, state):
+        if state == QtCore.Qt.Checked:
+            self.rvbip_pw.show()
+        else:
+            self.rvbip_pw.hide()
 
-  #  def resp_toggle_changed(self, state):
-  #      if state == QtCore.Qt.Checked:
-  #          self.resp_pw.show()
-  #      else:
-  #          self.resp_pw.hide()
+    def lvlead_toggle_changed(self, state):
+        if state == QtCore.Qt.Checked:
+           self.lvlead_pw.show()
+        else:
+           self.lvlead_pw.hide()
 
-   # def boxa_toggle_changed(self, state):
-   #     if state == QtCore.Qt.Checked:
-   #         if not hasattr(self.laser_exp.boxa, "sample_code"):
-   #             self.laser_exp.boxa.calc_sample_code()
-   #             self.boxa_plt.setData(self.laser_exp.boxa.sample_code, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
-   #         self.boxa_pw.show()
-   #     else:
-   #         self.boxa_pw.hide()
+    def ralead_toggle_changed(self, state):
+        if state == QtCore.Qt.Checked:
+            self.ralead_pw.show()
+        else:
+            self.ralead_pw.hide()
 
     def calc_region_changed(self):
         roi_begin, roi_end = self.calc_region.getRegion()
@@ -501,12 +454,12 @@ class LaserGui(QtWidgets.QWidget):
             self.pressure_pw.setBackground("w")
             self.laser1_pw.setBackground("w")
             self.laser2_pw.setBackground("w")
-            self.cranial1_pw.setBackground("w")
-        #    self.cranial2_pw.setBackground("w")
-         #   self.distalBP_pw.setBackground("w")
+            self.ecg3_pw.setBackground("w")
+            self.rvshock_pw.setBackground("w")
+            self.rvbip_pw.setBackground("w")
+            self.lvlead_pw.setBackground("w")
+            self.ralead_pw.setBackground("w")
             self.overview_pw.setBackground("w")
-        #    self.resp_pw.setBackground("w")
-        #    self.boxa_pw.setBackground("w")
         else:
             p.setColor(self.backgroundRole(), QtCore.Qt.black)
             p.setColor(self.foregroundRole(), QtCore.Qt.white)
@@ -514,12 +467,12 @@ class LaserGui(QtWidgets.QWidget):
             self.pressure_pw.setBackground("k")
             self.laser1_pw.setBackground("k")
             self.laser2_pw.setBackground("k")
-            self.cranial1_pw.setBackground("k")
-          #  self.cranial2_pw.setBackground("k")
-           # self.distalBP_pw.setBackground("k")
+            self.ecg3_pw.setBackground("k")
+            self.rvshock_pw.setBackground("k")
+            self.rvbip_pw.setBackground("k")
+            self.lvlead_pw.setBackground("k")
+            self.ralead_pw.setBackground("k")
             self.overview_pw.setBackground("k")
-          #  self.resp_pw.setBackground("k")
-          #  self.boxa_pw.setBackground("k")
 
         self.setPalette(p)
 
@@ -556,36 +509,35 @@ class LaserGui(QtWidgets.QWidget):
 
             self.laser1_value.setText(laser1_text)
             self.laser2_value.setText(laser2_text)
-            self.rr_value.setText("RR: " + str(int(np.mean(np.diff(self.laser_exp.ecg.peaks_sample)))))
-            self.hr_value.setText("HR: " + str(int(60000/np.mean(np.diff(self.laser_exp.ecg.peaks_sample)))))
+            self.rr_value.setText("RR (Bipolar ECG): " + str(int(np.mean(np.diff(self.laser_exp.ecg.peaks_sample)))))
+            self.hr_value.setText("HR: " + str(int(60000 / np.mean(np.diff(self.laser_exp.ecg.peaks_sample)))))
             try:
                 self.sbp_value.setText("SBP: " + str(self.laser_exp.results['SBP_Mean']))
                 self.map_value.setText("MAP: " + str(self.laser_exp.results['MAP_Mean']))
-                self.cf_value.setText("CF: " + str(self.laser_exp.results['TCD1_mean']))
 
-           #     if self.laser_exp.results['dSBP_Mean'] != "":
-           #         self.distsbp_value.setText("dSBP: " + str(self.laser_exp.results['dSBP_Mean']))
-           #         self.distmap_value.setText("dMAP: " + str(self.laser_exp.results['dMAP_Mean']))
+            #     if self.laser_exp.results['dSBP_Mean'] != "":
+            #         self.distsbp_value.setText("dSBP: " + str(self.laser_exp.results['dSBP_Mean']))
+            #         self.distmap_value.setText("dMAP: " + str(self.laser_exp.results['dMAP_Mean']))
 
             except Exception as e:
                 print(e)
             try:
-                laser1_array_ys = 100*((self.laser_exp.laser1_magic_data_all))
+                laser1_array_ys = 100 * ((self.laser_exp.laser1_magic_data_all))
             except:
-                laser1_array_ys = np.zeros((1,1000))
+                laser1_array_ys = np.zeros((1, 1000))
 
             try:
-                laser1_sum = 100*((self.laser_exp.laser1_magic_data))
+                laser1_sum = 100 * ((self.laser_exp.laser1_magic_data))
             except:
                 laser1_sum = np.zeros((1000))
 
             try:
-                laser2_array_ys =100*((self.laser_exp.laser2_magic_data_all))
+                laser2_array_ys = 100 * ((self.laser_exp.laser2_magic_data_all))
             except:
-                laser2_array_ys = np.zeros((1,1000))
+                laser2_array_ys = np.zeros((1, 1000))
 
             try:
-                laser2_sum =100*((self.laser_exp.laser2_magic_data))
+                laser2_sum = 100 * ((self.laser_exp.laser2_magic_data))
             except:
                 laser2_sum = np.zeros((1000))
 
@@ -595,13 +547,8 @@ class LaserGui(QtWidgets.QWidget):
                                                 laser2_sum=laser2_sum,
                                                 parent=self)
 
-           # dual_laser_window = DualLaserWindow(laser1_array_ys=100*(np.exp(self.laser_exp.laser1_magic_data_all)-1),
-           #                                     laser1_sum=100*(np.exp(self.laser_exp.laser1_magic_data)-1),
-           #                                     laser2_array_ys=100*(np.exp(self.laser_exp.laser2_magic_data_all)-1),
-           #                                     laser2_sum=100*(np.exp(self.laser_exp.laser2_magic_data)-1),
-           #                                     parent=self)
-            dual_laser_window.show()
 
+            dual_laser_window.show()
     def calc_6s(self):
         roi_begin, roi_end = self.calc_region.getRegion()
         roi_end = roi_begin + 6000
@@ -626,16 +573,6 @@ class LaserGui(QtWidgets.QWidget):
             print(e)
         else:
             print("Image Saved")
-
-    def shock(self):#Ale
-        print(f"Patient: {self.laser_exp.patient} Experiment:{self.laser_exp.exp} was Shocked")
-        self.shock_status_lbl.setText("Recorded as shock delivered - close window to advance")
-        self.shock_result = "Shock"
-
-    def noshock(self): #Ale
-        print(f"Patient: {self.laser_exp.patient} Experiment:{self.laser_exp.exp} was not Shocked")
-        self.shock_status_lbl.setText("Recorded as no shock delivered - close window to advance")
-        self.shock_result = "No Shock"
 
     def calc_hrv(self):
         ecg_hint = self.laser_exp.hints['Period']
