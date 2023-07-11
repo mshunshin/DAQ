@@ -1,10 +1,10 @@
 import sys
 import os
-os.environ['PYQTGRAPH_QT_LIB'] = 'PyQt5'
-
+os.environ['PYQTGRAPH_QT_LIB'] = 'PySide6'
 import hdy
 
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
+
 
 def main():
 

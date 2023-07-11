@@ -282,13 +282,13 @@ class Opt_GUI(QtWidgets.QWidget):
         try:
             self.widget_to_exp()
 
-            self.exp_collection.calc_results(results_type = self.type_cb.currentData())
+            self.exp_collection.calc_results(results_type=self.type_cb.currentData())
 
             rp = self.exp_collection.results_plot
 
             self.results_pi.clear()
 
-            zero_line_pen = pg.mkPen('FFFFFF', width=2)
+            zero_line_pen = pg.mkPen('#FFFFFF', width=2)
             zero_line = pg.InfiniteLine(pos=0, angle=0, pen=zero_line_pen, movable=False)
             self.results_pi.addItem(zero_line)
 
@@ -305,27 +305,27 @@ class Opt_GUI(QtWidgets.QWidget):
             self.results_pi.addItem(error_bars)
 
             self.results_plt = self.results_pi.scatterPlot()
-            self.results_plt.setData(x=rp['x_all'], y=rp['y_all'], symbol='o', symbolBrush='3333FF', symbolPen=None, pen=None)
+            self.results_plt.setData(x=rp['x_all'], y=rp['y_all'], symbol='o', symbolBrush='#3333FF', symbolPen=None, pen=None)
 
             self.results_mean_plt = self.results_pi.scatterPlot()
             self.results_mean_plt.setData(x=err_df['Target_num'],
                                           y=err_df['benefit_mean'],
                                           symbol='o',
-                                          symbolBrush='33FF33',
+                                          symbolBrush='#33FF33',
                                           symbolPen=None,
                                           pen=None)
 
-            optim_pen = pg.mkPen("33FF33", width=2)
+            optim_pen = pg.mkPen("#33FF33", width=2)
             self.optim_plt = self.results_pi.plot()
             self.optim_plt.setData(x=rp['xs'], y=rp['ys'], pen=optim_pen, symbol=None)
 
             self.optim_upper_plt = self.results_pi.plot()
-            self.optim_upper_plt.setData(x=rp['x'], y=rp['predict_mean_ci_upp'], pen="FF444488", symbol=None)
+            self.optim_upper_plt.setData(x=rp['x'], y=rp['predict_mean_ci_upp'], pen="#FF444488", symbol=None)
 
             self.optim_lower_plt = self.results_pi.plot()
-            self.optim_lower_plt.setData(x=rp['x'], y=rp['predict_mean_ci_low'], pen="FF444488", symbol=None)
+            self.optim_lower_plt.setData(x=rp['x'], y=rp['predict_mean_ci_low'], pen="#FF444488", symbol=None)
 
-            f = pg.FillBetweenItem(self.optim_upper_plt, self.optim_lower_plt, "FF444488")
+            f = pg.FillBetweenItem(self.optim_upper_plt, self.optim_lower_plt, "#FF444488")
             self.results_pi.addItem(f)
 
             self.optim_delay_lbl.setText("Optimum Delay: {0:.0f}ms".format(rp['optim_delay']))
@@ -479,7 +479,7 @@ class OptimWidget(QtWidgets.QWidget):
 
         self.pressure_pw = pg.PlotWidget(axisItems={'bottom':TimeAxisItem(orientation='bottom')})
         self.pressure_pi = self.pressure_pw.getPlotItem()
-        self.pressure_pi.setLabel(axis='left',text="BP")
+        self.pressure_pi.setLabel(axis='left', text="BP")
         self.pressure_plt = self.pressure_pi.plot()
         self.pressure_peak_plt = self.pressure_pi.plot()
 
@@ -560,9 +560,9 @@ class OptimWidget(QtWidgets.QWidget):
 
             if self.optim_exp.final_transitions_dir_use:
                 if transition_dir == 'AO':
-                    transition_text = pg.TextItem(html='<div style="text-align:center; color:#000;"><pre>   ON<br><br>OFF   </pre></div>', color="000", anchor=(0.5,0.5))
+                    transition_text = pg.TextItem(html='<div style="text-align:center; color:#000;"><pre>   ON<br><br>OFF   </pre></div>', color="#000", anchor=(0.5,0.5))
                 else:
-                    transition_text = pg.TextItem(html='<div style="text-align:center; color:#000;"><pre>ON   <br><br>   OFF</pre></div>', color="000", anchor=(0.5,0.5))
+                    transition_text = pg.TextItem(html='<div style="text-align:center; color:#000;"><pre>ON   <br><br>   OFF</pre></div>', color="#000", anchor=(0.5,0.5))
 
                 self.ecg_pi.addItem(transition_text)
                 transition_text.setPos(transition, 0)
@@ -612,7 +612,7 @@ class OptimWidget(QtWidgets.QWidget):
         p = self.palette()
 
         if state == QtCore.Qt.Checked:
-            p.setColor(self.backgroundRole(), QtCore.Qt.white)
+            p.setColor(self.backgroundRole(), QtCore.Qt.White)
             p.setColor(self.foregroundRole(), QtCore.Qt.black)
             self.ecg_pw.setBackground("w")
             self.pressure_pw.setBackground("w")

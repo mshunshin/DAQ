@@ -66,5 +66,5 @@ class DAQ_File():
 
     @staticmethod
     def fast_load_txt(file_f):
-        return(np.array(pd.read_csv(file_f, delimiter=' ', dtype=np.float, header=None).iloc[:, 0]))
+        return(np.array(pd.read_csv(file_f, delimiter=' ', dtype=np.float32, header=None).iloc[:, 0]))
 
