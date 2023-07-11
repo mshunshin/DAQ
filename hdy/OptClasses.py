@@ -10,8 +10,6 @@ import scipy.interpolate
 
 import mmt
 
-
-
 from . import *
 
 
@@ -66,12 +64,13 @@ class OptCollection:
                 exp_source_hints['exp'] = exp_hints['Experiment']
                 exp_source_hints['search_for_files'] = True
                 exp_source_hints['hints'] = exp_hints
+                exp_source_hints['original_source_select'] = str(self.source)
 
                 self.exp_source_hints_list.append(exp_source_hints)
                 self.exp_source_list.append('dict')
                 self.exp_title_list.append(exp)
 
-        elif self.source.startswith('directory'):
+        elif self.source.startswith('directory') and "abbot" not in self.source:
 
             i = 1
             for file in os.listdir(self.daq_dir):
@@ -82,6 +81,7 @@ class OptCollection:
                     exp_source_hints['zip_fn'] = file
                     exp_source_hints['patient'] = self.patient
                     exp_source_hints['exp'] = "Exp" + str(i)
+                    exp_source_hints['original_source_select'] = str(self.source)
 
                     exp_hints = {}
                     exp_hints['ECG'] = 'ecg'
@@ -91,7 +91,7 @@ class OptCollection:
                     exp_hints['bp_dist'] = 'bp_dist'
                     exp_hints['bp_prox'] = 'bp_prox'
 
-                    if source.endswith('-invasive'):
+                    if "invasive" in source:
                         exp_hints['Pressure'] = 'BPAO'
                     elif source.endswith('hopehf'):
                         exp_hints['Pressure'] = 'BP'
@@ -103,6 +103,37 @@ class OptCollection:
                         exp_hints['Pressure'] = 'bp_prox'
                     else:
                         exp_hints['Pressure'] = 'BP'
+
+                    exp_source_hints['hints'] = exp_hints
+                    print(exp_source_hints)
+                    self.exp_source_hints_list.append(exp_source_hints)
+                    self.exp_source_list.append('dict')
+                    self.exp_title_list.append("Exp" + str(i))
+
+                    i += 1
+
+        elif self.source.startswith('directory-invasive-abbot'):
+
+            i = 1
+            for file in os.listdir(self.daq_dir):
+                if file.endswith(".txt"):
+                    exp_source_hints = {}
+                    exp_source_hints['save_dir'] = self.save_dir
+                    exp_source_hints['daq_dir'] = self.daq_dir
+                    exp_source_hints['zip_fn'] = file
+                    exp_source_hints['patient'] = self.patient
+                    exp_source_hints['exp'] = "Exp" + str(i)
+                    exp_source_hints['original_source_select'] = str(self.source)
+
+                    exp_hints = {}
+                    exp_hints['ECG'] = 'ecg'
+                    exp_hints['BPAO'] = 'bpao'
+                    exp_hints['BP'] = 'BP'
+                    exp_hints['BoxA'] = 'boxa'
+                    exp_hints['bp_dist'] = 'bp_dist'
+                    exp_hints['bp_prox'] = 'bp_prox'
+
+                    exp_hints['Pressure'] = 'BPAO'
 
                     exp_source_hints['hints'] = exp_hints
                     print(exp_source_hints)
@@ -392,8 +423,11 @@ class OptAnalysis:
         self.hints_transitions_sample = []
         self.pressure_cutoff = 0
 
-        self.daq_exp = DAQ_File(self.daq_dir, self.zip_fn,
-                                search_for_files=self.search_for_files)
+        if source_hints['original_source_select'] != "directory-invasive-abbot":
+            self.daq_exp = DAQ_File(self.daq_dir, self.zip_fn,
+                                    search_for_files=self.search_for_files)
+        else:
+            self.daq_exp = Abbot_File(os.path.join(self.daq_dir, self.zip_fn))
 
         self.daq_fl = self.daq_exp.zip_fl
 

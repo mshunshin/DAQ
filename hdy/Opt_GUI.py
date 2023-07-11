@@ -32,6 +32,9 @@ class Opt_Selector_GUI(QtWidgets.QWidget):
         self.select_dir_invasive_btn = QtWidgets.QPushButton("Load Directory Invasive")
         self.select_dir_invasive_btn.clicked.connect(self.select_dir_invasive)
 
+        self.select_dir_invasive_abbot_btn = QtWidgets.QPushButton("Load Directory Abbot")
+        self.select_dir_invasive_abbot_btn.clicked.connect(self.select_dir_invasive_abbot)
+
         self.select_dir_bpprox_btn = QtWidgets.QPushButton("Load Directory BP Prox")
         self.select_dir_bpprox_btn.clicked.connect(self.select_dir_bpprox)
 
@@ -42,6 +45,7 @@ class Opt_Selector_GUI(QtWidgets.QWidget):
         self.select_layout.addWidget(self.select_db_btn)
         self.select_layout.addWidget(self.select_dir_noninvasive_btn)
         self.select_layout.addWidget(self.select_dir_invasive_btn)
+        self.select_layout.addWidget(self.select_dir_invasive_abbot_btn)
         self.select_layout.addWidget(self.select_dir_bpprox_btn)
         self.select_layout.addWidget(self.select_dir_bpdist_btn)
 
@@ -73,6 +77,14 @@ class Opt_Selector_GUI(QtWidgets.QWidget):
     def select_dir_invasive(self):
         self.directory = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory - Invasive"))
         self.source = 'directory-invasive'
+        self.source_hints['daq_dir'] = self.directory
+        self.source_hints['save_dir'] = self.directory
+        print(self.directory)
+        self.close()
+
+    def select_dir_invasive_abbot(self):
+        self.directory = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory - Invasive"))
+        self.source = 'directory-invasive-abbot'
         self.source_hints['daq_dir'] = self.directory
         self.source_hints['save_dir'] = self.directory
         print(self.directory)
