@@ -59,6 +59,7 @@ class OptCollection:
                 exp_hints = dict(db_pt[db_pt.Experiment == exp].iloc[0])
 
                 exp_source_hints = {}
+                exp_source_hints['source'] = source
                 exp_source_hints['save_dir'] = self.save_dir
                 exp_source_hints['daq_dir'] = self.daq_dir
                 exp_source_hints['zip_fn'] = exp_hints['File']
@@ -77,6 +78,7 @@ class OptCollection:
             for file in os.listdir(self.daq_dir):
                 if file.endswith(".zip"):
                     exp_source_hints = {}
+                    exp_source_hints['source'] = source
                     exp_source_hints['save_dir'] = self.save_dir
                     exp_source_hints['daq_dir'] = self.daq_dir
                     exp_source_hints['zip_fn'] = file
@@ -91,11 +93,11 @@ class OptCollection:
                     exp_hints['bp_dist'] = 'bp_dist'
                     exp_hints['bp_prox'] = 'bp_prox'
 
-                    if source.endswith('-invasive'):
+                    if "-invasive" in source:
                         exp_hints['Pressure'] = 'BPAO'
                     elif source.endswith('hopehf'):
                         exp_hints['Pressure'] = 'BP'
-                    elif source.endswith('-noninvasive'):
+                    elif '-noninvasive' in source:
                         exp_hints['Pressure'] = 'BP'
                     elif source.endswith('bpdist'):
                         exp_hints['Pressure'] = 'bp_dist'
@@ -392,8 +394,10 @@ class OptAnalysis:
         self.hints_transitions_sample = []
         self.pressure_cutoff = 0
 
-        self.daq_exp = DAQ_File(self.daq_dir, self.zip_fn,
-                                search_for_files=self.search_for_files)
+        if "-fino" in source_hints['source']:
+            self.daq_exp = Fino_File(self.daq_dir, self.zip_fn, search_for_files=self.search_for_files)
+        else:
+            self.daq_exp = DAQ_File(self.daq_dir, self.zip_fn, search_for_files=self.search_for_files)
 
         self.daq_fl = self.daq_exp.zip_fl
 

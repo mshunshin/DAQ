@@ -1,7 +1,7 @@
 #import matplotlib
 #matplotlib.use('Qt5Agg')
 import os
-os.environ['PYQTGRAPH_QT_LIB'] = 'PyQt5'
+os.environ['PYQTGRAPH_QT_LIB'] = 'PySide6'
 
 import sys
 
@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import scipy
 
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
 
 import hdy
 
@@ -24,10 +24,10 @@ def main():
     patient = 'DKDFT013 (d.keene@imperial.ac.uk)'
     exp="Exp20"
 
-    database_dir = '/Volumes/Matt-Data/Dropbox/DK_PhD/DATA/Exercise_Laser/'
-    database_fn = 'Exercise-DB.csv'
-    patient = 'ZB exercise'
-    exp = "Exp23"
+    database_dir = '/Users/matthew/Library/CloudStorage/Dropbox/DK_PhD/DATA/DKEPS/'
+    database_fn = 'EPS-DB.csv'
+    patient = '1066'
+    exp = "Exp1"
     mode = "normal"
 
 
@@ -77,7 +77,7 @@ def main():
 
     m = hdy.LaserGui(pt)
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 if __name__ == '__main__':
     main()

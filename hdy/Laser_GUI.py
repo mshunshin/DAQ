@@ -269,8 +269,6 @@ class LaserGui(QtWidgets.QWidget):
         self.plot_layout.addWidget(self.laser1_pw, stretch=1)
         self.plot_layout.addWidget(self.laser2_pw, stretch=1)
         self.plot_layout.addWidget(self.cranial1_pw, stretch=1)
-    #
-
 
      #   self.plot_layout.addWidget(self.distalBP_pw, stretch=1)
     #    self.plot_layout.addWidget(self.cranial2_pw, stretch=1)
@@ -282,7 +280,6 @@ class LaserGui(QtWidgets.QWidget):
 
         self.plot_layout.setSpacing(0)
         self.plot_layout.setContentsMargins(0,0,0,0)
-
 
         self.minibtn_layout.addLayout(self.turnbtn_layout)
         self.btn_layout.addLayout(self.shockbtn_layout)
@@ -377,14 +374,16 @@ class LaserGui(QtWidgets.QWidget):
 
         #self.laser1_plt.setData(laser1_data, pen='#3273F5', antialise=True, autoDownsample=True, clipToView=True)
         #self.laser2_plt.setData(laser2_data, pen='#3273F5', antialise=True, autoDownsample=True, clipToView=True)
-        self.laser1_plt.setData(x=np.arange(samples), y=laser1_data, pen='#03c6fc', pensize=50, antialise=True, autoDownsample=True, clipToView=True)
-        self.laser2_plt.setData(x=np.arange(samples), y=laser2_data, pen='#03c6fc', antialise=True, autoDownsample=True, clipToView=True)
+
+        self.laser1_plt.setData(x=np.arange(samples), y=laser1_data, pen='#03c6fc', symbol=None, pensize=50, antialise=True, autoDownsample=True, clipToView=True)
+        self.laser2_plt.setData(x=np.arange(samples), y=laser2_data, pen='#03c6fc', symbol=None, antialise=True, autoDownsample=True, clipToView=True)
+
         #self.envelope1_plt.setData(x=np.arange(envelope1_data.shape[0]), y=envelope1_data, pen='g', antialise=True, autoDownsample=True, clipToView=True)
         #self.envelope2_plt.setData(x=np.arange(envelope2_data.shape[0]), y=envelope2_data, pen='g', antialise=True, autoDownsample=True, clipToView=True)
 
         self.overview_plt.setData(x=np.arange(samples), y=self.laser_exp.ecg.data, pen='#0FA00F', symbol=None, antialise=True, autoDownsample=True, clipToView=True)
 
-        self.ecg_plt.setData(x=np.arange(samples), y=self.laser_exp.ecg.data, pen='02B83A', symbol=None, antialise=True, autoDownsample=True, clipToView=True)
+        self.ecg_plt.setData(x=np.arange(samples), y=self.laser_exp.ecg.data, pen='#02B83A', symbol=None, antialise=True, autoDownsample=True, clipToView=True)
 
 
         if not self.hrv_toggle.isChecked():
@@ -434,43 +433,44 @@ class LaserGui(QtWidgets.QWidget):
         self.overview_region.setRegion(rgn)
 
     def laser1_toggle_changed(self, state):
-        if state == QtCore.Qt.Checked:
+        if state == QtCore.Qt.Checked.value:
+            print("Sdfsddfsdfsdfs")
             self.laser1_pw.show()
         else:
             self.laser1_pw.hide()
 
     def laser2_toggle_changed(self, state):
-        if state == QtCore.Qt.Checked:
+        if state == QtCore.Qt.Checked.value:
             self.laser2_pw.show()
         else:
             self.laser2_pw.hide()
 
     def cranial1_toggle_changed(self, state):
-        if state == QtCore.Qt.Checked:
+        if state == QtCore.Qt.Checked.value:
             self.cranial1_pw.show()
         else:
             self.cranial1_pw.hide()
 
  #   def cranial2_toggle_changed(self, state):
- #       if state == QtCore.Qt.Checked:
+ #       if state == QtCore.Qt.Checked.value:
  #           self.cranial2_pw.show()
  #       else:
  #           self.cranial2_pw.hide()
 
  #   def bp_distal_toggle_changed(self, state):
- #       if state == QtCore.Qt.Checked:
+ #       if state == QtCore.Qt.Checked.value:
  #           self.distalBP_pw.show()
  #       else:
  #           self.distalBP_pw.hide()
 
   #  def resp_toggle_changed(self, state):
-  #      if state == QtCore.Qt.Checked:
+  #      if state == QtCore.Qt.Checked.value:
   #          self.resp_pw.show()
   #      else:
   #          self.resp_pw.hide()
 
    # def boxa_toggle_changed(self, state):
-   #     if state == QtCore.Qt.Checked:
+   #     if state == QtCore.Qt.Checked.value:
    #         if not hasattr(self.laser_exp.boxa, "sample_code"):
    #             self.laser_exp.boxa.calc_sample_code()
    #             self.boxa_plt.setData(self.laser_exp.boxa.sample_code, pen='#732F9B', antialise=True, autoDownsample=True, clipToView=True)
@@ -494,7 +494,7 @@ class LaserGui(QtWidgets.QWidget):
 
         p = self.palette()
 
-        if state == QtCore.Qt.Checked:
+        if state == QtCore.Qt.Checked.value:
             p.setColor(self.backgroundRole(), QtCore.Qt.white)
             p.setColor(self.foregroundRole(), QtCore.Qt.black)
             self.ecg_pw.setBackground("w")
@@ -649,7 +649,7 @@ class LaserGui(QtWidgets.QWidget):
 
 
     def hrv_toggle_changed(self, state):
-        if state == QtCore.Qt.Checked:
+        if state == QtCore.Qt.Checked.value:
             if not hasattr(self, "hrv_xs"):
                 self.calc_hrv()
 

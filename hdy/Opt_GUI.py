@@ -7,9 +7,9 @@ import pandas as pd
 import hdy
 
 from PySide6 import QtGui, QtCore, QtWidgets
-#from PyQt5 import QtGui, QtCore, QtWidgets
 
 import pyqtgraph as pg
+
 
 class Opt_Selector_GUI(QtWidgets.QWidget):
 
@@ -29,6 +29,9 @@ class Opt_Selector_GUI(QtWidgets.QWidget):
         self.select_dir_noninvasive_btn = QtWidgets.QPushButton("Load Directory Non-invasive")
         self.select_dir_noninvasive_btn.clicked.connect(self.select_dir_noninvasive)
 
+        self.select_dir_noninvasive_fino_btn = QtWidgets.QPushButton("Load Directory Non-invasive FINO")
+        self.select_dir_noninvasive_fino_btn.clicked.connect(self.select_dir_noninvasive_fino)
+
         self.select_dir_invasive_btn = QtWidgets.QPushButton("Load Directory Invasive")
         self.select_dir_invasive_btn.clicked.connect(self.select_dir_invasive)
 
@@ -41,6 +44,7 @@ class Opt_Selector_GUI(QtWidgets.QWidget):
         self.select_layout = QtWidgets.QVBoxLayout()
         self.select_layout.addWidget(self.select_db_btn)
         self.select_layout.addWidget(self.select_dir_noninvasive_btn)
+        self.select_layout.addWidget(self.select_dir_noninvasive_fino_btn)
         self.select_layout.addWidget(self.select_dir_invasive_btn)
         self.select_layout.addWidget(self.select_dir_bpprox_btn)
         self.select_layout.addWidget(self.select_dir_bpdist_btn)
@@ -65,6 +69,14 @@ class Opt_Selector_GUI(QtWidgets.QWidget):
     def select_dir_noninvasive(self):
         self.directory = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory - Non-invasive"))
         self.source = 'directory-noninvasive'
+        self.source_hints['daq_dir'] = self.directory
+        self.source_hints['save_dir'] = self.directory
+        print(self.directory)
+        self.close()
+
+    def select_dir_noninvasive_fino(self):
+        self.directory = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory - Fino Zip"))
+        self.source = 'directory-noninvasive-fino'
         self.source_hints['daq_dir'] = self.directory
         self.source_hints['save_dir'] = self.directory
         print(self.directory)
@@ -560,9 +572,9 @@ class OptimWidget(QtWidgets.QWidget):
 
             if self.optim_exp.final_transitions_dir_use:
                 if transition_dir == 'AO':
-                    transition_text = pg.TextItem(html='<div style="text-align:center; color:#000;"><pre>   ON<br><br>OFF   </pre></div>', color="#000", anchor=(0.5,0.5))
+                    transition_text = pg.TextItem(html='<div style="text-align:center; color:#FFF;"><pre>   ON<br><br>OFF   </pre></div>', color="#000", anchor=(0.5,0.5))
                 else:
-                    transition_text = pg.TextItem(html='<div style="text-align:center; color:#000;"><pre>ON   <br><br>   OFF</pre></div>', color="#000", anchor=(0.5,0.5))
+                    transition_text = pg.TextItem(html='<div style="text-align:center; color:#FFF;"><pre>ON   <br><br>   OFF</pre></div>', color="#000", anchor=(0.5,0.5))
 
                 self.ecg_pi.addItem(transition_text)
                 transition_text.setPos(transition, 0)
@@ -612,21 +624,21 @@ class OptimWidget(QtWidgets.QWidget):
         p = self.palette()
 
         if state == QtCore.Qt.Checked:
-            p.setColor(self.backgroundRole(), QtCore.Qt.White)
-            p.setColor(self.foregroundRole(), QtCore.Qt.black)
+            #p.setColor(self.backgroundRole(), QtCore.Qt.white)
+            #p.setColor(self.foregroundRole(), QtCore.Qt.black)
             self.ecg_pw.setBackground("w")
             self.pressure_pw.setBackground("w")
             self.boxa_pw.setBackground("w")
             self.overview_pw.setBackground("w")
         else:
-            p.setColor(self.backgroundRole(), QtCore.Qt.black)
-            p.setColor(self.foregroundRole(), QtCore.Qt.white)
+            #p.setColor(self.backgroundRole(), QtCore.Qt.black)
+            #p.setColor(self.foregroundRole(), QtCore.Qt.white)
             self.ecg_pw.setBackground("k")
             self.pressure_pw.setBackground("k")
             self.boxa_pw.setBackground("k")
             self.overview_pw.setBackground("k")
 
-        self.setPalette(p)
+        #self.setPalette(p)
 
     def clicked_transition(self, obj):
         idx = np.argmax([x == obj for x in self.transitions_lst])

@@ -367,7 +367,7 @@ class LaserAnalysis(object):
 
                 outer_delay_max = np.max(outer_delay, axis=1)
 
-                shift = np.int(-np.median(outer_delay_max))
+                shift = np.int64(-np.median(outer_delay_max))
 
                 if shift < 0:
                     shift = 0
