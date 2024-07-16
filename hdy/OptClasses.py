@@ -13,7 +13,7 @@ import mmt
 
 
 from . import *
-
+from .MicroFile import MicroFile
 
 class OptCollection:
 
@@ -71,6 +71,35 @@ class OptCollection:
                 self.exp_source_hints_list.append(exp_source_hints)
                 self.exp_source_list.append('dict')
                 self.exp_title_list.append(exp)
+
+        elif self.source == "directory-noninvasive-micropace":
+            i = 1
+            for file in os.listdir(self.daq_dir):
+                if not file.lower().endswith(".csv"):
+                    continue
+
+                exp_source_hints = {}
+                exp_source_hints['source'] = source
+                exp_source_hints['save_dir'] = self.save_dir
+                exp_source_hints['daq_dir'] = self.daq_dir
+                exp_source_hints['zip_fn'] = file
+                exp_source_hints['patient'] = self.patient
+                exp_source_hints['exp'] = "Exp" + str(i)
+
+                exp_hints = {}
+                exp_hints['ECG'] = 'ecg'
+                exp_hints['BP'] = 'ppg'
+                exp_hints['BoxA'] = 'boxa'
+
+                exp_hints['Pressure'] = 'BP'
+
+                exp_source_hints['hints'] = exp_hints
+                print(exp_source_hints)
+                self.exp_source_hints_list.append(exp_source_hints)
+                self.exp_source_list.append('dict')
+                self.exp_title_list.append("Exp" + str(i))
+
+                i += 1
 
         elif self.source.startswith('directory'):
 
@@ -394,7 +423,9 @@ class OptAnalysis:
         self.hints_transitions_sample = []
         self.pressure_cutoff = 0
 
-        if "-fino" in source_hints['source']:
+        if source_hints['source'] == "directory-noninvasive-micropace":
+            self.daq_exp = MicroFile(self.daq_dir, self.zip_fn)
+        elif "-fino" in source_hints['source']:
             self.daq_exp = Fino_File(self.daq_dir, self.zip_fn, search_for_files=self.search_for_files)
         else:
             self.daq_exp = DAQ_File(self.daq_dir, self.zip_fn, search_for_files=self.search_for_files)

@@ -52,8 +52,8 @@ class Fino_File():
             for file, file_hints in channels.items():
                 try:
                     file_index = first_substring(zip_file_list, file)
-                    file_f = zip_f.open(zip_file_list[file_index], 'r')
-                    file_d = self.fast_load_txt(file_f, sep=";")
+                    with zip_f.open(zip_file_list[file_index], 'r') as file_f:
+                        file_d = self.fast_load_txt(file_f, sep=";")
                     file_d = scipy.signal.resample_poly(file_d, up=file_hints['up'], down=file_hints['down'])
                     print(f'file:{file}, shape{file_d.shape}')
 
@@ -62,7 +62,8 @@ class Fino_File():
                         out_x = np.linspace(0, file_d.shape[0]-1, self.ecg.shape[0])
 
                         file_d = ld_inter(out_x)
-
+                    if file_hints["name"] == "BP":
+                        file_d = file_d / 100.0
                     setattr(self, file_hints["name"], file_d)
                 except Exception as e:
                     print("Exception", e)
