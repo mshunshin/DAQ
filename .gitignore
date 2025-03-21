@@ -27,4 +27,5 @@
 *.jpg
 *.jpeg
 
-venv/
+.venv/
+

@@ -1,0 +1,1029 @@
+Delivered-To: m@shun-shin.com
+Received: by 2002:ab4:92c5:0:b0:25e:fc25:2482 with SMTP id d5csp3792683ecx;
+        Thu, 20 Jun 2024 08:25:00 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IGoxzD4j8rjbAgs/G65wf+5yxNvxbOym8fBGJpbStisqLDlgQqgkqjN949VU1CUqdsw9rQv
+X-Received: by 2002:a05:6a20:baaa:b0:1b6:4151:615b with SMTP id adf61e73a8af0-1bcbb5805c4mr5137123637.14.1718897099743;
+        Thu, 20 Jun 2024 08:24:59 -0700 (PDT)
+ARC-Seal: i=2; a=rsa-sha256; t=1718897099; cv=pass;
+        d=google.com; s=arc-20160816;
+        b=z6rj4cCxCOzB4EbE/1YOFb0GtTlVcESmn/4PdA8Q55MzEqsyyDy8P7PewYUMH7B4dX
+         nekkCiK/KK3i7MhQUj55zym9t33Il1W9+tFd0JxaDyWvn/y24oubVNLPAnaKCZ0IRlUY
+         PXGvAeMlXl9Ihf2/eaL21fEr3Uoi10stqqtVcQc5wXKW31m74HKBiC9Fbst2cwpBSn7K
+         gVDsQJ6TbdE1ztz40u4OctkTe0EWYc85M7BlItxDW+dJE9nzuf6OgXjd8qyRKjyboGBt
+         bAHDBxsI3ZOfcgnP9+0c3ErJP/LgKiY/5Jj647vfwjRt1gHnpx/Vu4gN6ylmZhsgvDh9
+         0TBA==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=mime-version:content-language:accept-language:in-reply-to
+         :references:message-id:date:thread-index:thread-topic:subject:cc:to
+         :from:dkim-signature;
+        bh=D1JvxznlAzaGOPZ6zw6QDMlF8zxAQ+00BkOSXfUjdBc=;
+        fh=QGSOfwr8mGKm8JWou6SMh0TKmQyDHSDxYQh+QtsTjTI=;
+        b=LubZIPjHkfIHLbpnjokX0C05OCVMdfBylMEHmL3OonltZTBeBZkgy8keGqtwHJR8Or
+         cFncv56Ev84LDZWYZ356PPQSnvRYuTg9AQ4D1Xt95GtAJD84bf8LWFg1dFZYNQEchNHm
+         Y49H85QtGXekTvv+oumvBacnryNjh81vgZUwuQgwrTfleZD6Vn7RVQ+VwpCdttPUWqqR
+         bI7FzS6DCevzmrh+MiF7hYS33896EeExlppU68OQn1pigJPRryM5zc0k/Yi36RuL6t8D
+         aGJtKUCMc+SVIjulBiCQsc4fDDadvvpniKTjV+LMatCvnwxiFPz9OLjiQCIh76zq5kQN
+         vnXQ==;
+        dara=google.com
+ARC-Authentication-Results: i=2; mx.google.com;
+       dkim=pass header.i=@micropace.eu header.s=selector1 header.b=HQGtIwrt;
+       arc=pass (i=1 spf=pass spfdomain=micropace.eu dkim=pass dkdomain=micropace.eu dmarc=pass fromdomain=micropace.eu);
+       spf=pass (google.com: domain of g.zwoerner@micropace.eu designates 2a01:111:f403:201e::701 as permitted sender) smtp.mailfrom=g.zwoerner@micropace.eu;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=micropace.eu
+Return-Path: <g.zwoerner@micropace.eu>
+Received: from AUS01-SY4-obe.outbound.protection.outlook.com (mail-sy4aus01on20701.outbound.protection.outlook.com. [2a01:111:f403:201e::701])
+        by mx.google.com with ESMTPS id 41be03b00d2f7-7076f9006c4si9220483a12.234.2024.06.20.08.24.58
+        for <m@shun-shin.com>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 20 Jun 2024 08:24:59 -0700 (PDT)
+Received-SPF: pass (google.com: domain of g.zwoerner@micropace.eu designates 2a01:111:f403:201e::701 as permitted sender) client-ip=2a01:111:f403:201e::701;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@micropace.eu header.s=selector1 header.b=HQGtIwrt;
+       arc=pass (i=1 spf=pass spfdomain=micropace.eu dkim=pass dkdomain=micropace.eu dmarc=pass fromdomain=micropace.eu);
+       spf=pass (google.com: domain of g.zwoerner@micropace.eu designates 2a01:111:f403:201e::701 as permitted sender) smtp.mailfrom=g.zwoerner@micropace.eu;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=micropace.eu
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=DgM7/zmkSQxkVhkw7LP9ltaWz/BwGWlCInUdB3+Xygx7gSNjFgVwO41hFyF3mIusm4Hncz0OJOv5yjDSN3PJRyhjYx8NvsV+5Um+4jGbjsOe7u8wZLl8k8yoQKxxdqX4Q1TLYPyKgPtKwpDxZuBiPlglNCd3QDhA5B+k2eE9fOaj4cZp8XV2oqJqG5nCI6Nj5L9ocpiBfUEy8fuXCi+c0XJyeDM1OONuW0zaUrsNE7A5dHXnHol57KIqB8LDpJxpfPOxuWeuZdjb9U81E7rTNmPMrW42X1EfCz0BOGw31QjTASOYErd+3CLzmi30H95hk1a4HmQ8tBtaepEjxdRvNQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=D1JvxznlAzaGOPZ6zw6QDMlF8zxAQ+00BkOSXfUjdBc=;
+ b=MDeBsk/vLy2HSp5cojg3ro3hIK2Tp+KaKyQuudqaS4bsq6y1V/tlAK1q6ZsAEQ7PBErlZfQD2jRwKexkKFcZYxUeUDJyWllq9vTo/oqs/pVzwn5fgyzSXZThfq6EANSPfIIHODUxAGM7ERoXR8Lqe+TZXkGrv+osdE/S5Rf8EHc1aobQh6q3TXEjPnMIoeI6VuMqiaKTWEBTdMT2Qpzz8ulb3ZGZP27kLYxeTpIMLuQk3ioEF2iuyBDYYkEh2op3rl23T4efHcJGIoJN7x+gApUoNudeEPWlP+X2Jlp4xAZR1vw2+/QL5khCYIH2FpdFIfIywKyGltiClETqcklSSg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=micropace.eu; dmarc=pass action=none header.from=micropace.eu;
+ dkim=pass header.d=micropace.eu; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=micropace.eu;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=D1JvxznlAzaGOPZ6zw6QDMlF8zxAQ+00BkOSXfUjdBc=;
+ b=HQGtIwrtHBlmRRax9feno0eBiRUJXw+WztuVl00vcdqE5qZ5URQ5A90KIBEcwGWjAquKqWZKaZvgAM359Obg2FISfGirOv3fxhtDo9PIMGMRIoQhKwCugFPhUgYKZaX2jS4hz4hpYbudjWZ7AdeWftBZXlSQPx/7xf0Sa2LsQymSF7NRMlTOO6v9moIfkzMM8H3E4xfE/FNOadGZG5uswmJaDqDzWW3/F/6GcK1CgeIUmTVyQnKVkkuhkGMx3FuP0PMF6r/ImgO53HhUQCtJfVVs7SOt2cbl7rmPwPrGRRA3skrlvExAiBXRHC3OvEBV/qEq7G2W4rdOmVkF1ro3ew==
+Received: from SY0P300MB0370.AUSP300.PROD.OUTLOOK.COM (2603:10c6:10:281::9) by
+ SY7P300MB0409.AUSP300.PROD.OUTLOOK.COM (2603:10c6:10:28e::13) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.7698.21; Thu, 20 Jun 2024 15:24:55 +0000
+Received: from SY0P300MB0370.AUSP300.PROD.OUTLOOK.COM
+ ([fe80::da9:5e50:a53:adca]) by SY0P300MB0370.AUSP300.PROD.OUTLOOK.COM
+ ([fe80::da9:5e50:a53:adca%3]) with mapi id 15.20.7698.020; Thu, 20 Jun 2024
+ 15:24:54 +0000
+From: Greg Zwoerner <g.zwoerner@micropace.eu>
+To: Matthew Shun-Shin <m@shun-shin.com>, "ZUHAIR, Mohamed (IMPERIAL COLLEGE
+ HEALTHCARE NHS TRUST)" <m.zuhair@nhs.net>
+CC: Stephen Brown <s.brown@micropace.eu>, "KEENE, Daniel (IMPERIAL COLLEGE
+ HEALTHCARE NHS TRUST)" <daniel.keene@nhs.net>
+Subject: RE: Hope HF 2 data
+Thread-Topic: Hope HF 2 data
+Thread-Index: AQHatlsefp+d3qA1702kVEr+8KFK9rG3W+UAgBmC09A=
+Date: Thu, 20 Jun 2024 15:24:54 +0000
+Message-ID:
+ <SY0P300MB03708C19C366B7E365D6A8B0ECC82@SY0P300MB0370.AUSP300.PROD.OUTLOOK.COM>
+References:
+ <SY0P300MB03700E3DB3A96CC625748F19ECF82@SY0P300MB0370.AUSP300.PROD.OUTLOOK.COM>
+ <D5231158-7096-40F0-B496-DFAE7338E3DD@shun-shin.com>
+In-Reply-To: <D5231158-7096-40F0-B496-DFAE7338E3DD@shun-shin.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=micropace.eu;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SY0P300MB0370:EE_|SY7P300MB0409:EE_
+x-ms-office365-filtering-correlation-id: bfdbc165-5b9c-4974-a947-08dc913d2327
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;ARA:13230037|366013|1800799021|376011|38070700015;
+x-microsoft-antispam-message-info:
+ =?us-ascii?Q?vsTEpMYiH46kv4kca6qPSJREn6zS6Hljbin3hJTmZ6dZ/jkIOyik9u8XVPkR?=
+ =?us-ascii?Q?c2NlnRBBcj76NXMT/bKqM42CxUThGAn90aeuwv6iyojyTBSqFfMZs18Q2hab?=
+ =?us-ascii?Q?vKcPjLqVeeDcdrz2Old8FCuMZsSdVoxUoKvdqdjGip+HQevF8vSwp58VqXQg?=
+ =?us-ascii?Q?rQgBcUgRWGthIj2MLfuY7iNtXpWhETWzcfrf7fMpBAjwXBhPxYlJo7tLasBI?=
+ =?us-ascii?Q?vlypx62aiNvZaJjH6JalE7zRHZ9Jt7bGMUIr/AX3Vxko6Iy4cw239jpONHLl?=
+ =?us-ascii?Q?vWa4LdrQcIdc/YEyfCeRmxB0A3BFvggk1TZH76pGc27D/8h7YOOGhXMPqARj?=
+ =?us-ascii?Q?saXyqerVNuQ8TJQEpNbLv55R6lF8dn/LoRigXWkw5FAEpr9IIVXXQ0++Wtbf?=
+ =?us-ascii?Q?Qs1eGF2h/XBrBInJeOqeJ0BV09Y6pavlqW+XpcMKTVyyGXgul79yRWAKJO39?=
+ =?us-ascii?Q?TsjjG6PQmAJO4EKHSneqxeCcW0pvJPhNzaUYwlgzILn8P9268d8/CUKFm/4Y?=
+ =?us-ascii?Q?lxT4FuVs4vRtz/WR2y6oSG1dkR2P1CJqs9zXWJ1N512uFXQQOKJvVstflTtO?=
+ =?us-ascii?Q?RmyfBouc8YwhQDQstCIr1kfq0zWE/tWn6j9RWzqLaCvtJ+8i026MaPzYnLev?=
+ =?us-ascii?Q?6+zCE2/1Q9XFd9xGwtY6H7IJMAe9xRjTTUf5/FVY0ab3y2Ohka8dzyqhawVO?=
+ =?us-ascii?Q?kZNZZrdeZwdsFsoC3xQP1uKy6416chbuV1diyHZ3LfUAS3ZXDWOZ0VurgCiM?=
+ =?us-ascii?Q?ydrT8el+cntc4UBOG34vxhlJ4uWy1bgXxCO16V5r33/mj97P1i5EKZSI7/y8?=
+ =?us-ascii?Q?+VA3wshd22ax+asUS7FRrq2L1OkkSXGaPgbfa7+UvVaNWxHSaMKnYMI4a80y?=
+ =?us-ascii?Q?lL3mpibi67AyMT581/MsIZZPlFlw0r7Iz8tCM3+ql0E4RKLs6NwyqiAFBIur?=
+ =?us-ascii?Q?KYpbu73pBio8wZu/rnVBEhqLQxMSU6J60EAyqkd4fg5wYBywV+4oAjdc/O38?=
+ =?us-ascii?Q?z1FS/u9QvuHRDULun02/E+SprCc98u6KIGcASiFw/ZorFy+1EBRiuSLUMmCF?=
+ =?us-ascii?Q?GRgL+9tMdcumzhpxz0oG4T2u4OlZLbm2rx4DvsHz+kckZoVT5Qjq5B34RqI0?=
+ =?us-ascii?Q?pOnlApMydkmehklxapRfNI9oZ9QbNxv9IggTSgOggr1HVcdC8JzMfbyrvtuh?=
+ =?us-ascii?Q?sTIb2x0+9oiSJQBYt7hu6dgtUbkVaJ+FnX5tm1bIUQo2WA5eGFUHnbMt9s/p?=
+ =?us-ascii?Q?VVEjrI77ohRTkkABcO7ydhvnT6XI73rbLaUbMVUMXRRaJG2sH+BFOn/xPdUB?=
+ =?us-ascii?Q?+ebwDJ3revoeP8mhJuKhjtWCXdYoH/WxLjPt50eYKJvh0g2B2vQTS5Jtekeq?=
+ =?us-ascii?Q?VGxGlhE=3D?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SY0P300MB0370.AUSP300.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230037)(366013)(1800799021)(376011)(38070700015);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?zNc72KX1bW3UKyAUgl3PByQ16FPty0kMMNB4O9lL2Kwv6RXWhNpzItoGJu7/?=
+ =?us-ascii?Q?vZ2+wubrFWR7sjtBuh6AS79s22kXGvniYM1qAy7vcHBxWJ0+WStayUuAjDud?=
+ =?us-ascii?Q?n/ItDYhJfFaoBoSo5w7Cc8Ga5lffuNI4ZnWUqjbCflyo2F/j0YiLroKMW2Bv?=
+ =?us-ascii?Q?5fNCV/QLxupQIIBa6dwKmX1YBtODn1THAV27d4yCodv4dt8cUMRXiDC+xjW2?=
+ =?us-ascii?Q?3Bl6P1FeFUXir+oRM6UQOmJ8jXKItJovnb2ZlFAE7ZCJfG/knh99cWcD4OSU?=
+ =?us-ascii?Q?vETb77ar5+vT7szlf92D+8xi1SJdh9Nsh5NjkjNf88Zkqo167a4veEIs4c2v?=
+ =?us-ascii?Q?868/bKZW421BCO6WwSdBE6eq0bYzUQvJQeOv0sHbwVCjjOsBWiG4GAniAHcg?=
+ =?us-ascii?Q?8n2flp66XkQcwzGiAvbYE+vdLo2YAbhMRLTmPnnALograkElG8380VjJNoBr?=
+ =?us-ascii?Q?xD/32IdbVn1GG7DmzyQfogKMmp2OO8h5ePEz4xZ6lJXqTd7x4AqWZQs0cDOp?=
+ =?us-ascii?Q?YHZCWVzFr7bpzQZrnYdMs4EW70BgzhEMkkdRpZWuSKZLQgRjysQxE9LKmA4Z?=
+ =?us-ascii?Q?+ttExh5TuI8VZsjVFjyrx2ktYum9DneQW6t/PNL3NhEZnj3AX1VQmkNyDHPB?=
+ =?us-ascii?Q?QzFlkAhHTmOBfHvyfoA1KqC2kRMuv6Nz+k+nNV9XuoQtderYb82Ky1hiE+B6?=
+ =?us-ascii?Q?FGM3WOPFHcKlXtDY4Lj3+DHhYw9P6eyrA2LSF96qqMOnXDPemIGbNRJIA3pd?=
+ =?us-ascii?Q?Ffg8yHDQhcS4UnPpzusU2UU2y+mHMkz2w5ayELuSjAESkZpvOUJIPLoxK9V6?=
+ =?us-ascii?Q?nOylpwbLmBAlHfaDWC3G8y20S4h0VhIrGR9mODQrSYkx+13K0kD+BcHv/J1c?=
+ =?us-ascii?Q?AN8/K/OCYJ+YIENddiZ4i4q8Zb/hPiK++a4rvZlAGcNTc/rUMUP5tKuLtSdi?=
+ =?us-ascii?Q?gip7JzUAqY79RpwF4PwmUB4z7ZNRFTLGRFuib2knEfbFKUs1deGpxesSsh0G?=
+ =?us-ascii?Q?efAI9SKXovkqk8snzEa0Jzu6URbu7BZcRnwXLCgg/L3cMT72mTIs7o6MeI9p?=
+ =?us-ascii?Q?TDbVx3X9uPfRJSuHiOQTpEwenUu3biISATmHgkhYK4nPh25I5dpbpQjZ5Gbf?=
+ =?us-ascii?Q?yHdDrtaB7LIqymt2/W3jRiqsTgmbVdTWcGjRS7NtQ7r3csJXZ3L72hFTZcDx?=
+ =?us-ascii?Q?GzDpCOrjbVLLWcR/5rKtEVP3KWR75FcN853EII2h6rAwzvE9TkPfwUYKk36X?=
+ =?us-ascii?Q?ElB/3+qWtUHtAiPJQXsocgP1uTrruhN2qan4CIkUgZgyHvmJTWD9kKjiU58B?=
+ =?us-ascii?Q?E6yy02ZTurwtOB92/PqrNBQRTKnb/V0h8UtnDuSPdLW2wImSutUr/uEL4bx2?=
+ =?us-ascii?Q?Tp09B8RJW1ASrbvm3QhdajcacWGrevSMOmwjXh1/J42u3vO7AbW/9+dPeiBO?=
+ =?us-ascii?Q?Ro7RyTtP8EbF7XZFitNOhtxlCJXCB443BJhxr954cmnqcOX2L3ooO36LmLtO?=
+ =?us-ascii?Q?RIh3U1+aperRYJbCHMmKSnMvChMskGucBnEyFTlfxIgzdNJSDwehdLlWVygF?=
+ =?us-ascii?Q?XZ/gJWXDvF1sknVlvQhSqKERmBY49jYbA12pmRNBl1F3pZl9PGbsfOC4iWpU?=
+ =?us-ascii?Q?9wbUi8HlVD9Iao1CAZ9cLS8e7v/snBJy8Pqz9R/o9a/Y?=
+Content-Type: multipart/alternative;
+	boundary="_000_SY0P300MB03708C19C366B7E365D6A8B0ECC82SY0P300MB0370AUSP_"
+MIME-Version: 1.0
+X-OriginatorOrg: micropace.eu
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SY0P300MB0370.AUSP300.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-Network-Message-Id: bfdbc165-5b9c-4974-a947-08dc913d2327
+X-MS-Exchange-CrossTenant-originalarrivaltime: 20 Jun 2024 15:24:54.8023
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 6c4d1499-996d-4347-afab-2d22b3b3fb08
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 9la6jDKZUSkYZ1/fIkUP4nXFcWv0w7yWgyDImt5YfN3KEv02PAXVrRrFHkjompqitocx7xX3F1rnsRP0pgwEzA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SY7P300MB0409
+
+--_000_SY0P300MB03708C19C366B7E365D6A8B0ECC82SY0P300MB0370AUSP_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Matt,
+
+
+
+Apologies, I don't think you ever got this.
+
+
+Annex added to E_A-AV Addendum to UIM V0.2a.docx (see below)
+I believe I saw a '64' which would mean we already emit GPIO signals
+Can you pass onto Mat / Akriti
+1.    Annex
+'Flag" Field in Saved Data is: ECG Stream return Event Flag (16 bif field)
+
+Bit order
+Dec
+Hex
+0
+01
+0x0001 =3D Bio 1 Stim Delivered
+1
+02
+0x0002 =3D Bio 2 Stim Delivered
+2
+04
+0x0004 =3D Bio 3 Stim Delivered
+3
+08
+0x0008 =3D Bio 4 Stim Delivered
+4
+16
+0x0010 =3D Intrinsic QRS Detected
+5
+32
+0x0020 =3D Paced QRS Detected
+6
+64
+0x0040 =3D Sync OUT GPIO1
+7
+128
+0x0080 =3D Sync OUT GPIO2
+8
+256
+0x0100 =3D Pacemaker Detected
+9
+512
+0x0200 =3D Triggering QRS
+10
+1,024
+0x0400 =3D Lead-off detected
+11
+2,048
+0x0800 =3D Stim Sx (ORed with Stim flag particular channel)
+12
+4,096
+0x1000 =3D Bio 1 High Impedance
+13
+8,192
+0x2000 =3D Bio 2 High Impedance
+14
+16,384
+0x4000 =3D Bio 3 High Impedance
+15
+32,768
+0x8000 =3D Bio 4 High Impedance
+
+Flags are additive, so for decimal numbers other than in the table, convert=
+ to 16 bit binary and look up the meaning of each set bit.
+
+
+
+
+
+Regards
+
+Greg
+
+
+
+-----Original Message-----
+From: Matthew Shun-Shin <m@shun-shin.com>
+Sent: Tuesday, June 4, 2024 11:48 AM
+To: Greg Zwoerner <g.zwoerner@micropace.eu>; ZUHAIR, Mohamed (IMPERIAL COLL=
+EGE HEALTHCARE NHS TRUST) <m.zuhair@nhs.net>
+Cc: Stephen Brown <s.brown@micropace.eu>; KEENE, Daniel (IMPERIAL COLLEGE H=
+EALTHCARE NHS TRUST) <daniel.keene@nhs.net>
+Subject: Re: Hope HF 2 data
+
+
+
+Nothing from you.
+
+
+
+Have a grant interview this week - so have been working on that.
+
+
+
+BW
+
+
+
+Matt
+
+
+
+Matthew Shun-Shin
+
+07863 330 743
+
+
+
+Clinical Senior Lecturer  // Director, Medical Ultrasound MSc // Lead for M=
+edicine, Phase 1c Imperial College London m.shun-shin@imperial.ac.uk<mailto=
+:m.shun-shin@imperial.ac.uk>
+
+
+
+Consultant Cardiologist
+
+Imperial College Healthcare NHS Trust
+
+m.shun-shin@nhs.net<mailto:m.shun-shin@nhs.net>
+
+
+
+> On 4 Jun 2024, at 09:50, Greg Zwoerner <g.zwoerner@micropace.eu<mailto:g.=
+zwoerner@micropace.eu>> wrote:
+
+>
+
+> Hi,
+
+>
+
+> I just wanted check whether you are waiting on anything from us in regard=
+ to processing/analysing the Hope 2 data from the other week?
+
+>
+
+> Regards
+
+>
+
+> Greg
+
+>
+
+>
+
+>
+
+> Get Outlook for iOS
+
+
+
+--_000_SY0P300MB03708C19C366B7E365D6A8B0ECC82SY0P300MB0370AUSP_
+Content-Type: text/html; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html xmlns:v=3D"urn:schemas-microsoft-com:vml" xmlns:o=3D"urn:schemas-micr=
+osoft-com:office:office" xmlns:w=3D"urn:schemas-microsoft-com:office:word" =
+xmlns:m=3D"http://schemas.microsoft.com/office/2004/12/omml" xmlns=3D"http:=
+//www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dus-ascii"=
+>
+<meta name=3D"Generator" content=3D"Microsoft Word 15 (filtered medium)">
+<style><!--
+/* Font Definitions */
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Aptos;}
+/* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	font-size:11.0pt;
+	font-family:"Aptos",sans-serif;
+	mso-ligatures:standardcontextual;
+	mso-fareast-language:EN-US;}
+p.MsoPlainText, li.MsoPlainText, div.MsoPlainText
+	{mso-style-priority:99;
+	mso-style-link:"Plain Text Char";
+	margin:0cm;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;
+	mso-ligatures:standardcontextual;
+	mso-fareast-language:EN-US;}
+span.PlainTextChar
+	{mso-style-name:"Plain Text Char";
+	mso-style-priority:99;
+	mso-style-link:"Plain Text";
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	font-size:11.0pt;
+	mso-fareast-language:EN-US;}
+@page WordSection1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 72.0pt 72.0pt 72.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+--></style><!--[if gte mso 9]><xml>
+<o:shapedefaults v:ext=3D"edit" spidmax=3D"1026" />
+</xml><![endif]--><!--[if gte mso 9]><xml>
+<o:shapelayout v:ext=3D"edit">
+<o:idmap v:ext=3D"edit" data=3D"1" />
+</o:shapelayout></xml><![endif]-->
+</head>
+<body lang=3D"EN-AU" link=3D"#0563C1" vlink=3D"#954F72" style=3D"word-wrap:=
+break-word">
+<div class=3D"WordSection1">
+<p class=3D"MsoPlainText">Hi Matt,<o:p></o:p></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoPlainText">Apologies, I don't think you ever got this.<o:p><=
+/o:p></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Calibri&quot;,sans-serif;mso-liga=
+tures:none">Annex added to
+<b>E_A-AV Addendum to UIM V0.2a.docx</b> (see below)<o:p></o:p></span></p>
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Calibri&quot;,sans-serif;mso-liga=
+tures:none">I believe I saw a '64' which would mean we already emit GPIO si=
+gnals
+<o:p></o:p></span></p>
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Calibri&quot;,sans-serif;mso-liga=
+tures:none">Can you pass onto Mat / Akriti<o:p></o:p></span></p>
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><b><span style=3D"font-size:24.0pt;font-family:&quot;Calibri&quot;=
+,sans-serif;mso-ligatures:none">1.</span></b><b><span style=3D"font-size:7.=
+0pt;font-family:&quot;Times New Roman&quot;,serif;mso-ligatures:none">&nbsp=
+;&nbsp;&nbsp;
+</span></b><b><span style=3D"font-size:24.0pt;font-family:&quot;Calibri&quo=
+t;,sans-serif;mso-ligatures:none">Annex<o:p></o:p></span></b></p>
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Calibri&quot;,sans-serif;mso-liga=
+tures:none">&#8216;Flag&#8221; Field in Saved Data is:
+</span><span style=3D"font-family:&quot;Calibri&quot;,sans-serif;color:blac=
+k;mso-ligatures:none">ECG Stream return Event Flag (16 bif field)</span><sp=
+an style=3D"font-family:&quot;Calibri&quot;,sans-serif;mso-ligatures:none">=
+<o:p></o:p></span></p>
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Calibri&quot;,sans-serif;mso-liga=
+tures:none">&nbsp;<o:p></o:p></span></p>
+<table class=3D"MsoTableGrid" border=3D"1" cellspacing=3D"0" cellpadding=3D=
+"0" style=3D"border-collapse:collapse;border:none">
+<thead>
+<tr>
+<td width=3D"42" style=3D"width:31.85pt;border:solid windowtext 1.0pt;backg=
+round:#F2F2F2;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"mso-margin-top-alt:auto;ms=
+o-margin-bottom-alt:auto;text-align:center">
+<span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;Times New =
+Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-language:EN-AU=
+">Bit order</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-famil=
+y:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language=
+:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"108" style=3D"width:81.05pt;border:solid windowtext 1.0pt;bord=
+er-left:none;background:#F2F2F2;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"mso-margin-top-alt:auto;ms=
+o-margin-bottom-alt:auto;text-align:center">
+<span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;Times New =
+Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-language:EN-AU=
+">Dec</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quo=
+t;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB=
+"><o:p></o:p></span></p>
+</td>
+<td width=3D"245" style=3D"width:184.05pt;border:solid windowtext 1.0pt;bor=
+der-left:none;background:#F2F2F2;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" align=3D"center" style=3D"mso-margin-top-alt:auto;ms=
+o-margin-bottom-alt:auto;text-align:center">
+<span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;Times New =
+Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-language:EN-AU=
+">Hex</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quo=
+t;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB=
+"><o:p></o:p></span></p>
+</td>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">0</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fami=
+ly:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-languag=
+e:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">01</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fam=
+ily:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-langua=
+ge:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">0x0001 =3D Bio 1 Stim Delivered</span><span lang=3D"EN-GB" style=
+=3D"font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-liga=
+tures:none;mso-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">1</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fami=
+ly:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-languag=
+e:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">02</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fam=
+ily:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-langua=
+ge:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">0x0002 =3D Bio 2 Stim Delivered</span><span lang=3D"EN-GB" style=
+=3D"font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-liga=
+tures:none;mso-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">2</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fami=
+ly:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-languag=
+e:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">04</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fam=
+ily:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-langua=
+ge:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">0x0004 =3D Bio 3 Stim Delivered</span><span lang=3D"EN-GB" style=
+=3D"font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-liga=
+tures:none;mso-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">3</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fami=
+ly:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-languag=
+e:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">08</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fam=
+ily:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-langua=
+ge:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">0x0008 =3D Bio 4 Stim Delivered</span><span lang=3D"EN-GB" style=
+=3D"font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-liga=
+tures:none;mso-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">4</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fami=
+ly:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-languag=
+e:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">16</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fam=
+ily:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-langua=
+ge:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">0x0010 =3D Intrinsic QRS Detected</span><span lang=3D"EN-GB" sty=
+le=3D"font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-li=
+gatures:none;mso-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">5</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fami=
+ly:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-languag=
+e:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">32</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fam=
+ily:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-langua=
+ge:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">0x0020 =3D Paced QRS Detected</span><span lang=3D"EN-GB" style=
+=3D"font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-liga=
+tures:none;mso-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">6</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fami=
+ly:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-languag=
+e:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">64</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fam=
+ily:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-langua=
+ge:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">0x0040 =3D Sync OUT GPIO1</span><span lang=3D"EN-GB" style=3D"fo=
+nt-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-ligatures:=
+none;mso-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">7</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fami=
+ly:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-languag=
+e:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">128</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fa=
+mily:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-langu=
+age:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">0x0080 =3D Sync OUT GPIO2</span><span lang=3D"EN-GB" style=3D"fo=
+nt-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-ligatures:=
+none;mso-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">8</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fami=
+ly:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-languag=
+e:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">256</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-fa=
+mily:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-langu=
+age:EN-GB"><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;color:black;mso-ligatures:none;mso-fareast-langu=
+age:EN-AU">0x0100 =3D Pacemaker Detected</span><span lang=3D"EN-GB" style=
+=3D"font-size:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-liga=
+tures:none;mso-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">9=
+</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;Tim=
+es New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"><o:=
+p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">5=
+12</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"><=
+o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">0=
+x0200 =3D Triggering QRS</span><span lang=3D"EN-GB" style=3D"font-size:10.0=
+pt;font-family:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-far=
+east-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">1=
+0</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;Ti=
+mes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"><o=
+:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">1=
+,024</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot=
+;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"=
+><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">0=
+x0400 =3D Lead-off detected</span><span lang=3D"EN-GB" style=3D"font-size:1=
+0.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-ligatures:none;mso-=
+fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">1=
+1</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;Ti=
+mes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"><o=
+:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">2=
+,048</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot=
+;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"=
+><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">0=
+x0800 =3D Stim Sx (ORed with Stim flag particular channel)</span><span lang=
+=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;Times New Roman&quot=
+;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"><o:p></o:p></span></=
+p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">1=
+2</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;Ti=
+mes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"><o=
+:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">4=
+,096</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot=
+;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"=
+><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">0=
+x1000 =3D Bio 1 High Impedance</span><span lang=3D"EN-GB" style=3D"font-siz=
+e:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-ligatures:none;m=
+so-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">1=
+3</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;Ti=
+mes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"><o=
+:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">8=
+,192</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot=
+;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"=
+><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">0=
+x2000 =3D Bio 2 High Impedance</span><span lang=3D"EN-GB" style=3D"font-siz=
+e:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-ligatures:none;m=
+so-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">1=
+4</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;Ti=
+mes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"><o=
+:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">1=
+6,384</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quo=
+t;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB=
+"><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">0=
+x4000 =3D Bio 3 High Impedance</span><span lang=3D"EN-GB" style=3D"font-siz=
+e:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-ligatures:none;m=
+so-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+<tr>
+<td width=3D"42" valign=3D"top" style=3D"width:31.85pt;border:solid windowt=
+ext 1.0pt;border-top:none;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">1=
+5</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;Ti=
+mes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB"><o=
+:p></o:p></span></p>
+</td>
+<td width=3D"108" valign=3D"top" style=3D"width:81.05pt;border-top:none;bor=
+der-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windo=
+wtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">3=
+2,768</span><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quo=
+t;Times New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-GB=
+"><o:p></o:p></span></p>
+</td>
+<td width=3D"245" valign=3D"top" style=3D"width:184.05pt;border-top:none;bo=
+rder-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid wind=
+owtext 1.0pt;padding:1.4pt 4.25pt 1.4pt 4.25pt">
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span lang=3D"EN-GB" style=3D"font-size:10.0pt;font-family:&quot;T=
+imes New Roman&quot;,serif;mso-ligatures:none;mso-fareast-language:EN-AU">0=
+x8000 =3D Bio 4 High Impedance</span><span lang=3D"EN-GB" style=3D"font-siz=
+e:10.0pt;font-family:&quot;Times New Roman&quot;,serif;mso-ligatures:none;m=
+so-fareast-language:EN-GB"><o:p></o:p></span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Calibri&quot;,sans-serif;mso-liga=
+tures:none">&nbsp;</span><span style=3D"font-size:12.0pt;mso-ligatures:none=
+"><o:p></o:p></span></p>
+<p class=3D"MsoNormal" style=3D"mso-margin-top-alt:auto;mso-margin-bottom-a=
+lt:auto"><span style=3D"font-family:&quot;Calibri&quot;,sans-serif;mso-liga=
+tures:none">Flags are additive, so for decimal numbers other than in the ta=
+ble, convert to 16 bit binary and look up the meaning
+ of each set bit.<o:p></o:p></span></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoPlainText">Regards<o:p></o:p></p>
+<p class=3D"MsoPlainText">Greg<o:p></o:p></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoPlainText"><span lang=3D"EN-US" style=3D"mso-fareast-languag=
+e:EN-AU">-----Original Message-----<br>
+From: Matthew Shun-Shin &lt;m@shun-shin.com&gt; <br>
+Sent: Tuesday, June 4, 2024 11:48 AM<br>
+To: Greg Zwoerner &lt;g.zwoerner@micropace.eu&gt;; ZUHAIR, Mohamed (IMPERIA=
+L COLLEGE HEALTHCARE NHS TRUST) &lt;m.zuhair@nhs.net&gt;<br>
+Cc: Stephen Brown &lt;s.brown@micropace.eu&gt;; KEENE, Daniel (IMPERIAL COL=
+LEGE HEALTHCARE NHS TRUST) &lt;daniel.keene@nhs.net&gt;<br>
+Subject: Re: Hope HF 2 data</span></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoPlainText">Nothing from you.<o:p></o:p></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoPlainText">Have a grant interview this week - so have been w=
+orking on that.<o:p></o:p></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoPlainText">BW<o:p></o:p></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoPlainText">Matt<o:p></o:p></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoPlainText">Matthew Shun-Shin<o:p></o:p></p>
+<p class=3D"MsoPlainText">07863 330 743<o:p></o:p></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoPlainText">Clinical Senior Lecturer&nbsp; // Director, Medic=
+al Ultrasound MSc // Lead for Medicine, Phase 1c Imperial College London
+<a href=3D"mailto:m.shun-shin@imperial.ac.uk"><span style=3D"color:windowte=
+xt;text-decoration:none">m.shun-shin@imperial.ac.uk</span></a><o:p></o:p></=
+p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoPlainText">Consultant Cardiologist<o:p></o:p></p>
+<p class=3D"MsoPlainText">Imperial College Healthcare NHS Trust<o:p></o:p><=
+/p>
+<p class=3D"MsoPlainText"><a href=3D"mailto:m.shun-shin@nhs.net"><span styl=
+e=3D"color:windowtext;text-decoration:none">m.shun-shin@nhs.net</span></a><=
+o:p></o:p></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+<p class=3D"MsoPlainText">&gt; On 4 Jun 2024, at 09:50, Greg Zwoerner &lt;<=
+a href=3D"mailto:g.zwoerner@micropace.eu"><span style=3D"color:windowtext;t=
+ext-decoration:none">g.zwoerner@micropace.eu</span></a>&gt; wrote:<o:p></o:=
+p></p>
+<p class=3D"MsoPlainText">&gt; <o:p></o:p></p>
+<p class=3D"MsoPlainText">&gt; Hi,<o:p></o:p></p>
+<p class=3D"MsoPlainText">&gt; <o:p></o:p></p>
+<p class=3D"MsoPlainText">&gt; I just wanted check whether you are waiting =
+on anything from us in regard to processing/analysing the Hope 2 data from =
+the other week?<o:p></o:p></p>
+<p class=3D"MsoPlainText">&gt; <o:p></o:p></p>
+<p class=3D"MsoPlainText">&gt; Regards<o:p></o:p></p>
+<p class=3D"MsoPlainText">&gt; <o:p></o:p></p>
+<p class=3D"MsoPlainText">&gt; Greg<o:p></o:p></p>
+<p class=3D"MsoPlainText">&gt; <o:p></o:p></p>
+<p class=3D"MsoPlainText">&gt; <o:p></o:p></p>
+<p class=3D"MsoPlainText">&gt; <o:p></o:p></p>
+<p class=3D"MsoPlainText">&gt; Get Outlook for iOS<o:p></o:p></p>
+<p class=3D"MsoPlainText"><o:p>&nbsp;</o:p></p>
+</div>
+</body>
+</html>
+
+--_000_SY0P300MB03708C19C366B7E365D6A8B0ECC82SY0P300MB0370AUSP_--

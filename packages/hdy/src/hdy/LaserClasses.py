@@ -12,6 +12,7 @@ import scipy.interpolate
 
 
 import sklearn
+from pathlib import Path
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression, RANSACRegressor, TheilSenRegressor, HuberRegressor
 from sklearn.metrics import r2_score
@@ -20,6 +21,7 @@ from sklearn.metrics import r2_score
 import mmt
 
 from . import *
+from .MDT_File import MDT_File
 
 PR_DELAY = 120
 
@@ -61,12 +63,19 @@ class BSplineFeatures(sklearn.base.TransformerMixin):
 
 class LaserAnalysis(object):
 
-    def __init__(self, database_dir=None, database_fn=None, patient=None, exp=None, zip_fl=None, mode="normal"):
+    def __init__(self,
+                 database_dir=None,
+                 database_fn=None,
+                 patient=None,
+                 exp=None,
+                 zip_fl=None,
+                 mdt_fl: str = None,
+                 mode="normal"):
 
         self.results = collections.OrderedDict()
         self.results_beatbybeat = collections.OrderedDict()
 
-        if zip_fl is None:
+        if database_dir:
             self.database_dir = database_dir
             self.database_fn = database_fn
             self.patient = patient
@@ -88,10 +97,48 @@ class LaserAnalysis(object):
             self.period = getattr(self.hints, 'Period', "Undefined")
             self.notes = getattr(self.hints, "Notes", "NA")
 
+            ecg_source = str(getattr(self.hints, 'ECG', 'blank'))
+            pressure_source = str(getattr(self.hints, 'BP', 'blank'))
+            laser1_source = str(getattr(self.hints, 'Laser1', 'blank'))
+            laser2_source = str(getattr(self.hints, 'Laser2', 'blank'))
+            cranial1_source = str(getattr(self.hints, 'TCD1', 'blank'))
+            cranial2_source = str(getattr(self.hints, 'TCD2', 'blank'))
+            # distalBP_source = str(getattr(self.hints, 'BPDistal', 'blank'))
+            resp_source = str(getattr(self.hints, 'resp', 'blank'))
+            boxa_source = str(getattr(self.hints, 'boxa', 'blank'))
+
             print("Loading: {0}".format(self.zip_fl))
             print("Experiment: {0}".format(self.exp))
             print("Patient: {0}".format(self.patient))
 
+        if mdt_fl:
+            mdt_path = Path(mdt_fl)
+            self.zip_fl = mdt_fl
+            self.freq_hint = 1
+            self.ecg_hint = "Sinus"
+            self.period = "Undefined"
+            self.notes = "NA"
+            self.patient = patient
+            self.exp = exp
+            self.File = mdt_path.name
+            self.mode = mode
+
+            daq_raw = MDT_File(mdt_path.parent, mdt_path.name)
+            self.daq_raw = daq_raw
+            self.hints = {"Period": self.period,
+                          "File": self.File,}
+
+            ecg_source = "ecg"
+            pressure_source = "bp"
+            laser1_source = "laser1"
+            laser2_source = "ppg_green"
+            cranial1_source = "blank"
+            cranial2_source = "blank"
+            # distalBP_source = str(getattr(self.hints, 'BPDistal', 'blank'))
+            resp_source = "blank"
+            boxa_source = "blank"
+        else:
+            raise Exception
 
         try:
             self.begin = self.hints['Begin']
@@ -102,16 +149,6 @@ class LaserAnalysis(object):
             self.end = self.hints['End']
         except:
             self.end = None
-
-        ecg_source = str(getattr(self.hints, 'ECG', 'blank'))
-        pressure_source = str(getattr(self.hints, 'BP', 'blank'))
-        laser1_source = str(getattr(self.hints, 'Laser1', 'blank'))
-        laser2_source = str(getattr(self.hints, 'Laser2', 'blank'))
-        cranial1_source = str(getattr(self.hints, 'TCD1', 'blank'))
-        cranial2_source = str(getattr(self.hints, 'TCD2', 'blank'))
-        #distalBP_source = str(getattr(self.hints, 'BPDistal', 'blank'))
-        resp_source = str(getattr(self.hints, 'resp', 'blank'))
-        boxa_source = str(getattr(self.hints, 'boxa', 'blank'))
 
         self.ecg = DAQContainerECG(data = getattr(daq_raw, ecg_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
         self.pressure = DAQContainerBP(data = getattr(daq_raw, pressure_source, daq_raw.blank), sampling_rate=daq_raw.sampling_rate)
@@ -347,9 +384,9 @@ class LaserAnalysis(object):
         laser_data = np.log(laser_data) + laser_data/200
         #LD: hash out next three lines, unhash the last 2 laser_data (LPM_Run)
 
-        b, a = scipy.signal.iirnotch(median_hr/60, 5, 1000)
-        temp = scipy.signal.filtfilt(b, a, laser_data)
-        laser_data = laser_data - temp
+        #b, a = scipy.signal.iirnotch(median_hr/60, 5, 1000)
+        #temp = scipy.signal.filtfilt(b, a, laser_data)
+        #laser_data = laser_data - temp
 
 
         #sos = scipy.signal.butter(5, (0.7, 2.3), 'bandpass', fs=1000, output='sos')
@@ -413,7 +450,7 @@ class LaserAnalysis(object):
                 laser_f = scipy.interpolate.interp1d(xs, laser_temp)
                 laser_temp_thousand = laser_f(np.linspace(0, 1000, num=1000))
                 laser_temp_thousand = scipy.signal.detrend(laser_temp_thousand, type='constant')
-                laser_sum = laser_sum + laser_temp_thousand
+                laser_sum = laser_sum #+ laser_temp_thousand
                 laser_list.append(laser_temp_thousand)
                 inc_peaks = inc_peaks+1
 

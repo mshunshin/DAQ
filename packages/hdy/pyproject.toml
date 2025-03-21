@@ -1,0 +1,25 @@
+[project]
+name = "hdy"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Matthew Shun-Shin", email = "m@shun-shin.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "bottleneck>=1.4.2",
+    "numpy>=2.1.3",
+    "pandas>=2.2.3",
+    "pyqtgraph>=0.13.7",
+    "pyside6>=6.8.1",
+    "scikit-learn>=1.5.2",
+    "scipy>=1.14.1",
+]
+
+[project.scripts]
+hdy = "hdy:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

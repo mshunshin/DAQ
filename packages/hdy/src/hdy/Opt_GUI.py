@@ -44,6 +44,9 @@ class Opt_Selector_GUI(QtWidgets.QWidget):
         self.select_dir_micropace_btn = QtWidgets.QPushButton("Load Directory Micropace")
         self.select_dir_micropace_btn.clicked.connect(self.select_dir_micropace)
 
+        self.select_dir_micropace_btn = QtWidgets.QPushButton("Load Dir MDT")
+        self.select_dir_micropace_btn.clicked.connect(self.select_dir_mdt)
+
         self.select_layout = QtWidgets.QVBoxLayout()
         self.select_layout.addWidget(self.select_db_btn)
         self.select_layout.addWidget(self.select_dir_noninvasive_btn)
@@ -52,6 +55,7 @@ class Opt_Selector_GUI(QtWidgets.QWidget):
         self.select_layout.addWidget(self.select_dir_bpprox_btn)
         self.select_layout.addWidget(self.select_dir_bpdist_btn)
         self.select_layout.addWidget(self.select_dir_micropace_btn)
+        #self.select_layout.addWidget(self.select_dir_mdt)
 
         self.setLayout(self.select_layout)
 
@@ -113,6 +117,14 @@ class Opt_Selector_GUI(QtWidgets.QWidget):
         self.close()
 
     def select_dir_micropace(self):
+        self.directory = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory - Micropace CSV"))
+        self.source = 'directory-noninvasive-micropace'
+        self.source_hints['daq_dir'] = self.directory
+        self.source_hints['save_dir'] = self.directory
+        print(self.directory)
+        self.close()
+
+    def select_dir_mdt(self):
         self.directory = str(QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory - Micropace CSV"))
         self.source = 'directory-noninvasive-micropace'
         self.source_hints['daq_dir'] = self.directory
